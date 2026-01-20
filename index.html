@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Buzzer - WebRTC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* Role Selection Screen */
+        #roleSelection {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .role-btn {
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .role-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Status Section */
+        .status-bar {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-bar.active {
+            display: block;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .status-label {
+            color: #666;
+        }
+
+        .status-value {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-indicator.connected {
+            background: #4CAF50;
+        }
+
+        .status-indicator.disconnected {
+            background: #f44336;
+        }
+
+        .status-indicator.connecting {
+            background: #ff9800;
+        }
+
+        /* Host Mode */
+        #hostMode {
+            display: none;
+        }
+
+        #hostMode.active {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #da190b;
+        }
+
+        .btn-secondary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .winner-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .winner-display.active {
+            animation: pulse 0.5s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .winner-text {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .participants-list {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .participants-list h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .participant-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .participant-name {
+            color: #333;
+            font-weight: bold;
+        }
+
+        .participant-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .participant-status.waiting {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .participant-status.buzzed {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .participant-status.winner {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        /* Participant Mode */
+        #participantMode {
+            display: none;
+        }
+
+        #participantMode.active {
+            display: block;
+        }
+
+        .participant-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .room-name {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .participant-name-input {
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .join-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .join-btn:hover:not(:disabled) {
+            background: #45a049;
+        }
+
+        .join-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .buzz-button {
+            width: 100%;
+            padding: 40px;
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .buzz-button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .buzz-button:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .buzz-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .buzz-button.buzzed-disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .join-section {
+            display: none;
+        }
+
+        .join-section.active {
+            display: block;
+        }
+
+        .buzzer-section {
+            display: none;
+        }
+
+        .buzzer-section.active {
+            display: block;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #1976d2;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #1565c0;
+        }
+
+        /* WebRTC Connection Section */
+        .webrtc-section {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .webrtc-section.active {
+            display: block;
+        }
+
+        .webrtc-section h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .connection-setup {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .connection-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .connection-btn:hover {
+            background: #e8e8e8;
+        }
+
+        .textarea-group {
+            margin-bottom: 10px;
+        }
+
+        .textarea-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        button.copy-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button.copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .feedback {
+            font-size: 12px;
+            color: #4CAF50;
+            margin-top: 5px;
+            min-height: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Quiz Buzzer</h1>
+        <p class="subtitle">Real-time WebRTC-based buzzer system</p>
+
+        <!-- Role Selection -->
+        <div id="roleSelection">
+            <button class="role-btn" onclick="selectRole('host')">
+                👑 HOST (Coordinator)
+            </button>
+            <button class="role-btn" onclick="selectRole('participant')">
+                🎯 PARTICIPANT (Buzzer)
+            </button>
+            <div class="info-box">
+                <strong>How it works:</strong> One person hosts, others join as participants. When ready, participants buzz and the host sees who buzzed first.
+            </div>
+        </div>
+
+        <!-- Host Mode -->
+        <div id="hostMode">
+            <!-- Status Bar -->
+            <div class="status-bar active">
+                <div class="status-item">
+                    <span class="status-label">Connection:</span>
+                    <span class="status-value">
+                        <span class="status-indicator connecting" id="hostConnectionStatus"></span>
+                        <span id="hostConnectionText">Waiting for participants...</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Participants:</span>
+                    <span class="status-value" id="hostParticipantCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Round State:</span>
+                    <span class="status-value" id="hostRoundState">Idle</span>
+                </div>
+            </div>
+
+            <!-- WebRTC Setup -->
+            <div class="webrtc-section active" id="hostWebRtcSection">
+                <h3>WebRTC Setup</h3>
+                
+                <div class="textarea-group">
+                    <span class="textarea-label">Your Offer (Share with participants):</span>
+                    <textarea id="hostOfferText" readonly></textarea>
+                    <button class="copy-btn" onclick="copyToClipboard('hostOfferText')">Copy Offer</button>
+                    <div class="feedback" id="hostOfferFeedback"></div>
+                </div>
+
+                <div class="textarea-group">
+                    <span class="textarea-label">Paste Participant Answer Here:</span>
+                    <textarea id="hostAnswerText" placeholder="Paste participant's answer..."></textarea>
+                    <button class="copy-btn" onclick="hostProcessAnswer()">Process Answer</button>
+                    <div class="feedback" id="hostAnswerFeedback"></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="btn btn-primary" onclick="hostStartRound()">Start Round</button>
+                <button class="btn btn-secondary" onclick="hostResetBuzzer()">Reset Buzzer</button>
+            </div>
+
+            <!-- Winner Display -->
+            <div class="winner-display" id="hostWinnerDisplay">
+                <div>Waiting for buzzer...</div>
+            </div>
+
+            <!-- Participants List -->
+            <div class="participants-list">
+                <h3>Participants</h3>
+                <div id="hostParticipantsList">
+                    <div style="color: #999; text-align: center; padding: 10px;">No participants yet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Participant Mode -->
+        <div id="participantMode">
+            <!-- Status Bar -->
+            <div class="status-bar active">
+                <div class="status-item">
+                    <span class="status-label">Connection:</span>
+                    <span class="status-value">
+                        <span class="status-indicator connecting" id="participantConnectionStatus"></span>
+                        <span id="participantConnectionText">Not connected</span>
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Your Status:</span>
+                    <span class="status-value" id="participantStatus">Idle</span>
+                </div>
+            </div>
+
+            <!-- Join Section -->
+            <div class="join-section active">
+                <input 
+                    type="text" 
+                    id="participantNameInput" 
+                    class="participant-name-input" 
+                    placeholder="Enter your name..."
+                    maxlength="20"
+                >
+                
+                <div class="webrtc-section active">
+                    <h3>Connect to Host</h3>
+                    
+                    <div class="textarea-group">
+                        <span class="textarea-label">Paste Host's Offer Here:</span>
+                        <textarea id="participantOfferText" placeholder="Paste the host's offer..."></textarea>
+                    </div>
+
+                    <div class="textarea-group">
+                        <span class="textarea-label">Your Answer (Share with host):</span>
+                        <textarea id="participantAnswerText" readonly></textarea>
+                        <button class="copy-btn" onclick="copyToClipboard('participantAnswerText')">Copy Answer</button>
+                    </div>
+
+                    <button class="join-btn" onclick="participantConnect()">Connect to Host</button>
+                    <div class="feedback" id="participantConnectFeedback"></div>
+                </div>
+            </div>
+
+            <!-- Buzzer Section -->
+            <div class="buzzer-section">
+                <div class="participant-header">
+                    <div class="room-name">Connected as: <strong id="connectedParticipantName">-</strong></div>
+                </div>
+
+                <button class="buzz-button" id="buzzButton" onclick="participantBuzz()">
+                    BUZZ!
+                </button>
+
+                <div class="winner-display" id="participantWinnerDisplay" style="margin-top: 20px;">
+                    <div>Waiting for host to start round...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // STATE MANAGEMENT
+        // ========================================
+        const state = {
+            role: null,
+            participantName: '',
+            
+            // WebRTC
+            peerConnection: null,
+            dataChannel: null,
+            isHost: false,
+            
+            // Host state
+            buzzerLocked: false,
+            participants: new Map(), // participantName -> {id, buzzed, winner}
+            winner: null,
+            
+            // Participant state
+            hasLocalBuzzed: false
+        };
+
+        // ========================================
+        // ROLE SELECTION
+        // ========================================
+        function selectRole(role) {
+            state.role = role;
+            state.isHost = role === 'host';
+            
+            document.getElementById('roleSelection').style.display = 'none';
+            
+            if (role === 'host') {
+                document.getElementById('hostMode').classList.add('active');
+                hostInitialize();
+            } else {
+                document.getElementById('participantMode').classList.add('active');
+            }
+        }
+
+        // ========================================
+        // UTILITY FUNCTIONS
+        // ========================================
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            
+            showFeedback(elementId.replace('Text', 'Feedback'), 'Copied!');
+        }
+
+        function showFeedback(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                setTimeout(() => {
+                    element.textContent = '';
+                }, 2000);
+            }
+        }
+
+        // ========================================
+        // WEBRTC SETUP
+        // ========================================
+        async function initializeWebRTC(isHost) {
+            const configuration = {
+                iceServers: [
+                    { urls: ['stun:stun.l.google.com:19302'] },
+                    { urls: ['stun:stun1.l.google.com:19302'] }
+                ]
+            };
+
+            state.peerConnection = new RTCPeerConnection(configuration);
+
+            if (isHost) {
+                // HOST: Create data channel
+                state.dataChannel = state.peerConnection.createDataChannel('buzzer', { ordered: true });
+                setupDataChannel(state.dataChannel);
+            } else {
+                // PARTICIPANT: Wait for data channel from host
+                state.peerConnection.ondatachannel = (event) => {
+                    state.dataChannel = event.channel;
+                    setupDataChannel(state.dataChannel);
+                };
+            }
+
+            // ICE candidates
+            state.peerConnection.onicecandidate = (event) => {
+                if (event.candidate === null) {
+                    // ICE gathering complete
+                    if (isHost) {
+                        const sdp = state.peerConnection.localDescription.sdp;
+                        document.getElementById('hostOfferText').value = btoa(JSON.stringify({
+                            type: 'offer',
+                            sdp: sdp
+                        }));
+                    }
+                }
+            };
+
+            state.peerConnection.onconnectionstatechange = () => {
+                updateConnectionStatus();
+            };
+
+            state.peerConnection.oniceconnectionstatechange = () => {
+                updateConnectionStatus();
+            };
+
+            return state.peerConnection;
+        }
+
+        function setupDataChannel(channel) {
+            channel.onopen = () => {
+                console.log('Data channel opened');
+                updateConnectionStatus();
+                
+                if (!state.isHost) {
+                    showFeedback('participantConnectFeedback', 'Connected!');
+                    document.querySelector('.join-section').classList.remove('active');
+                    document.querySelector('.buzzer-section').classList.add('active');
+                }
+            };
+
+            channel.onclose = () => {
+                console.log('Data channel closed');
+                updateConnectionStatus();
+            };
+
+            channel.onerror = (error) => {
+                console.error('Data channel error:', error);
+            };
+
+            channel.onmessage = (event) => {
+                handleMessage(JSON.parse(event.data));
+            };
+        }
+
+        function handleMessage(message) {
+            if (state.isHost) {
+                handleHostMessage(message);
+            } else {
+                handleParticipantMessage(message);
+            }
+        }
+
+        function updateConnectionStatus() {
+            const state_dc = state.peerConnection?.connectionState || 'disconnected';
+            const isConnected = state_dc === 'connected';
+            
+            if (state.isHost) {
+                const indicator = document.getElementById('hostConnectionStatus');
+                const text = document.getElementById('hostConnectionText');
+                
+                indicator.className = 'status-indicator ' + (isConnected ? 'connected' : 'connecting');
+                text.textContent = isConnected ? 'Connected' : 'Connecting...';
+                
+                // Hide setup section when connected
+                if (isConnected) {
+                    setTimeout(() => {
+                        document.getElementById('hostWebRtcSection').style.display = 'none';
+                    }, 500);
+                }
+            } else {
+                const indicator = document.getElementById('participantConnectionStatus');
+                const text = document.getElementById('participantConnectionText');
+                
+                indicator.className = 'status-indicator ' + (isConnected ? 'connected' : 'connecting');
+                text.textContent = isConnected ? 'Connected to host' : 'Connecting...';
+            }
+        }
+
+        // ========================================
+        // HOST LOGIC
+        // ========================================
+        function hostInitialize() {
+            // Host creates offer
+            initializeWebRTC(true).then(async (pc) => {
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+            });
+        }
+
+        function hostProcessAnswer() {
+            const answerText = document.getElementById('hostAnswerText').value.trim();
+            
+            if (!answerText) {
+                showFeedback('hostAnswerFeedback', 'Paste an answer first');
+                return;
+            }
+
+            try {
+                const answer = JSON.parse(atob(answerText));
+                state.peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+                    .then(() => {
+                        showFeedback('hostAnswerFeedback', 'Answer processed!');
+                        document.getElementById('hostAnswerText').value = '';
+                    })
+                    .catch((error) => {
+                        showFeedback('hostAnswerFeedback', 'Error: ' + error.message);
+                    });
+            } catch (error) {
+                showFeedback('hostAnswerFeedback', 'Invalid answer format');
+            }
+        }
+
+        function handleHostMessage(message) {
+            switch (message.type) {
+                case 'join':
+                    hostHandleJoin(message);
+                    break;
+                case 'buzz':
+                    hostHandleBuzz(message);
+                    break;
+            }
+        }
+
+        function hostHandleJoin(message) {
+            const participantName = message.participantName;
+            
+            if (!state.participants.has(participantName)) {
+                state.participants.set(participantName, {
+                    id: Math.random().toString(36),
+                    buzzed: false,
+                    winner: false
+                });
+                
+                hostBroadcast({
+                    type: 'joined',
+                    participantName: participantName
+                });
+                
+                updateHostParticipantsList();
+                updateHostStatus();
+            }
+        }
+
+        function hostHandleBuzz(message) {
+            // Ignore if buzzer is already locked
+            if (state.buzzerLocked) {
+                console.log('Buzzer already locked, ignoring buzz from', message.participantName);
+                return;
+            }
+
+            const participantName = message.participantName;
+            const participant = state.participants.get(participantName);
+
+            if (!participant || participant.buzzed) {
+                // Already buzzed this round
+                return;
+            }
+
+            // FIRST buzz received - this participant wins!
+            state.buzzerLocked = true;
+            state.winner = participantName;
+            participant.buzzed = true;
+            participant.winner = true;
+
+            console.log(`Winner: ${participantName}`);
+
+            // Broadcast winner to all participants
+            hostBroadcast({
+                type: 'winner',
+                winner: participantName,
+                timestamp: message.timestamp
+            });
+
+            updateHostWinnerDisplay();
+            updateHostParticipantsList();
+            updateHostStatus();
+        }
+
+        function hostStartRound() {
+            state.buzzerLocked = false;
+            state.winner = null;
+
+            // Reset all participants' buzzed state
+            state.participants.forEach((participant) => {
+                participant.buzzed = false;
+                participant.winner = false;
+            });
+
+            hostBroadcast({
+                type: 'roundStart'
+            });
+
+            updateHostWinnerDisplay();
+            updateHostParticipantsList();
+            updateHostStatus();
+        }
+
+        function hostResetBuzzer() {
+            hostStartRound();
+        }
+
+        function hostBroadcast(message) {
+            if (state.dataChannel && state.dataChannel.readyState === 'open') {
+                state.dataChannel.send(JSON.stringify(message));
+            }
+        }
+
+        function updateHostStatus() {
+            document.getElementById('hostParticipantCount').textContent = state.participants.size;
+            
+            let roundState = 'Idle';
+            if (!state.buzzerLocked) {
+                roundState = 'Active';
+            } else if (state.winner) {
+                roundState = 'Locked - Winner: ' + state.winner;
+            }
+            
+            document.getElementById('hostRoundState').textContent = roundState;
+        }
+
+        function updateHostWinnerDisplay() {
+            const display = document.getElementById('hostWinnerDisplay');
+            
+            if (state.winner) {
+                display.classList.add('active');
+                display.innerHTML = `<div class="winner-text">🎉 ${state.winner} BUZZED FIRST! 🎉</div>`;
+            } else {
+                display.classList.remove('active');
+                display.innerHTML = '<div>Waiting for buzzer...</div>';
+            }
+        }
+
+        function updateHostParticipantsList() {
+            const listContainer = document.getElementById('hostParticipantsList');
+            
+            if (state.participants.size === 0) {
+                listContainer.innerHTML = '<div style="color: #999; text-align: center; padding: 10px;">No participants yet</div>';
+                return;
+            }
+
+            let html = '';
+            state.participants.forEach((participant, name) => {
+                let status = 'Waiting';
+                let statusClass = 'waiting';
+
+                if (participant.winner) {
+                    status = 'Winner ✓';
+                    statusClass = 'winner';
+                } else if (participant.buzzed) {
+                    status = 'Buzzed';
+                    statusClass = 'buzzed';
+                }
+
+                html += `
+                    <div class="participant-item">
+                        <span class="participant-name">${name}</span>
+                        <span class="participant-status ${statusClass}">${status}</span>
+                    </div>
+                `;
+            });
+
+            listContainer.innerHTML = html;
+        }
+
+        // ========================================
+        // PARTICIPANT LOGIC
+        // ========================================
+        async function participantConnect() {
+            const name = document.getElementById('participantNameInput').value.trim();
+            const offerText = document.getElementById('participantOfferText').value.trim();
+
+            if (!name) {
+                showFeedback('participantConnectFeedback', 'Enter your name');
+                return;
+            }
+
+            if (!offerText) {
+                showFeedback('participantConnectFeedback', 'Paste the host offer');
+                return;
+            }
+
+            try {
+                state.participantName = name;
+                
+                await initializeWebRTC(false);
+
+                const offer = JSON.parse(atob(offerText));
+                await state.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+                const answer = await state.peerConnection.createAnswer();
+                await state.peerConnection.setLocalDescription(answer);
+
+                // Wait for ICE gathering to complete
+                await new Promise((resolve) => {
+                    if (state.peerConnection.iceGatheringState === 'complete') {
+                        resolve();
+                    } else {
+                        const handler = () => {
+                            if (state.peerConnection.iceGatheringState === 'complete') {
+                                state.peerConnection.removeEventListener('icegatheringstatechange', handler);
+                                resolve();
+                            }
+                        };
+                        state.peerConnection.addEventListener('icegatheringstatechange', handler);
+                    }
+                });
+
+                const answerSdp = state.peerConnection.localDescription.sdp;
+                document.getElementById('participantAnswerText').value = btoa(JSON.stringify({
+                    type: 'answer',
+                    sdp: answerSdp
+                }));
+
+                document.getElementById('connectedParticipantName').textContent = name;
+
+            } catch (error) {
+                showFeedback('participantConnectFeedback', 'Connection error: ' + error.message);
+                console.error('Connection error:', error);
+            }
+        }
+
+        function participantBuzz() {
+            if (state.buzzerLocked || state.hasLocalBuzzed) {
+                return;
+            }
+
+            state.hasLocalBuzzed = true;
+
+            // Send buzz event to host
+            if (state.dataChannel && state.dataChannel.readyState === 'open') {
+                state.dataChannel.send(JSON.stringify({
+                    type: 'buzz',
+                    participantName: state.participantName,
+                    timestamp: performance.now()
+                }));
+            }
+
+            updateParticipantBuzzButton();
+            updateParticipantStatus();
+        }
+
+        function handleParticipantMessage(message) {
+            switch (message.type) {
+                case 'roundStart':
+                    participantHandleRoundStart();
+                    break;
+                case 'winner':
+                    participantHandleWinner(message);
+                    break;
+            }
+        }
+
+        function participantHandleRoundStart() {
+            state.hasLocalBuzzed = false;
+            state.buzzerLocked = false;
+
+            updateParticipantBuzzButton();
+            updateParticipantWinnerDisplay();
+            updateParticipantStatus();
+        }
+
+        function participantHandleWinner(message) {
+            state.buzzerLocked = true;
+
+            updateParticipantBuzzButton();
+            updateParticipantWinnerDisplay(message.winner);
+            updateParticipantStatus();
+        }
+
+        // Join the host
+        document.addEventListener('DOMContentLoaded', () => {
+            // After connecting, participant sends join message
+            const originalSetupDC = setupDataChannel;
+            setupDataChannel = function(channel) {
+                originalSetupDC(channel);
+                
+                if (!state.isHost && channel.readyState === 'open' && state.participantName) {
+                    // Introduce self to host
+                    channel.send(JSON.stringify({
+                        type: 'join',
+                        participantName: state.participantName
+                    }));
+                }
+            };
+        });
+
+        function updateParticipantBuzzButton() {
+            const button = document.getElementById('buzzButton');
+            
+            if (state.buzzerLocked) {
+                button.disabled = true;
+                button.classList.add('buzzed-disabled');
+                button.textContent = state.hasLocalBuzzed ? '✓ Already Buzzed' : '🔒 Locked';
+            } else if (state.hasLocalBuzzed) {
+                button.disabled = true;
+                button.classList.add('buzzed-disabled');
+                button.textContent = '✓ Buzzed This Round';
+            } else {
+                button.disabled = false;
+                button.classList.remove('buzzed-disabled');
+                button.textContent = 'BUZZ!';
+            }
+        }
+
+        function updateParticipantStatus() {
+            let status = 'Ready';
+            if (state.hasLocalBuzzed) {
+                status = 'Already buzzed';
+            } else if (state.buzzerLocked) {
+                status = 'Round locked';
+            }
+            
+            document.getElementById('participantStatus').textContent = status;
+        }
+
+        function updateParticipantWinnerDisplay(winner = null) {
+            const display = document.getElementById('participantWinnerDisplay');
+            
+            if (winner && state.buzzerLocked) {
+                display.classList.add('active');
+                if (winner === state.participantName) {
+                    display.innerHTML = `<div class="winner-text">🎉 YOU WIN! 🎉</div>`;
+                } else {
+                    display.innerHTML = `<div class="winner-text">${winner} buzzed first!</div>`;
+                }
+            } else {
+                display.classList.remove('active');
+                display.innerHTML = '<div>Waiting for host to start round...</div>';
+            }
+        }
+    </script>
+</body>
+</html>
