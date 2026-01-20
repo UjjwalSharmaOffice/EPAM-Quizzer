@@ -1,0 +1,14 @@
+{
+  "name": "epam-quizzer-frontend",
+  "version": "1.0.0",
+  "description": "Quiz buzzer frontend",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step required'"
+  },
+  "keywords": ["webrtc", "quiz", "buzzer"],
+  "author": "EPAM Quizzer",
+  "license": "MIT"
+}

@@ -1,0 +1,313 @@
+import { v4 as uuidv4 } from 'uuid';
+import logger from '../utils/logger.js';
+import config from '../config/config.js';
+import { NotFoundError, ConflictError } from '../utils/errors.js';
+
+/**
+ * Room represents a quiz session
+ * Manages host, participants, and buzzer state
+ */
+class Room {
+  constructor(roomId) {
+    this.id = roomId;
+    this.host = null;
+    this.participants = new Map(); // participantId -> participant
+    this.buzzerLocked = false;
+    this.winner = null;
+    this.createdAt = Date.now();
+    this.lastActivity = Date.now();
+  }
+
+  /**
+   * Check if room is idle (no activity for timeout period)
+   */
+  isIdle() {
+    return Date.now() - this.lastActivity > config.roomIdleTimeout;
+  }
+
+  /**
+   * Update last activity timestamp
+   */
+  touch() {
+    this.lastActivity = Date.now();
+  }
+
+  /**
+   * Get room summary for clients
+   */
+  getSummary() {
+    return {
+      id: this.id,
+      hostId: this.host?.id || null,
+      participantCount: this.participants.size,
+      buzzerLocked: this.buzzerLocked,
+      winner: this.winner?.id || null,
+    };
+  }
+}
+
+/**
+ * Manages multiple quiz rooms
+ * Single source of truth for room state
+ */
+class RoomManager {
+  constructor() {
+    this.rooms = new Map(); // roomId -> Room
+    this.userRooms = new Map(); // userId -> roomId (for quick lookup)
+    this.startCleanupInterval();
+  }
+
+  /**
+   * Create a new room
+   */
+  createRoom() {
+    const roomId = uuidv4().substring(0, 8);
+    const room = new Room(roomId);
+    this.rooms.set(roomId, room);
+    logger.info('RoomManager', 'Room created', { roomId });
+    return room;
+  }
+
+  /**
+   * Get room by ID
+   */
+  getRoom(roomId) {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      throw new NotFoundError('Room');
+    }
+    return room;
+  }
+
+  /**
+   * Get all rooms (for debug/admin purposes)
+   */
+  getAllRooms() {
+    return Array.from(this.rooms.values());
+  }
+
+  /**
+   * Delete room
+   */
+  deleteRoom(roomId) {
+    if (this.rooms.has(roomId)) {
+      this.rooms.delete(roomId);
+      logger.info('RoomManager', 'Room deleted', { roomId });
+    }
+  }
+
+  /**
+   * Join room as host
+   */
+  joinAsHost(roomId, hostData) {
+    const room = this.getRoom(roomId);
+
+    if (room.host) {
+      throw new ConflictError('Room already has a host');
+    }
+
+    if (room.participants.size > 0) {
+      throw new ConflictError('Cannot join as host - participants already in room');
+    }
+
+    room.host = {
+      id: hostData.id,
+      name: hostData.name,
+      joinedAt: Date.now(),
+    };
+
+    this.userRooms.set(hostData.id, roomId);
+    room.touch();
+
+    logger.info('RoomManager', 'Host joined room', {
+      roomId,
+      hostId: hostData.id,
+    });
+
+    return room;
+  }
+
+  /**
+   * Join room as participant
+   */
+  joinAsParticipant(roomId, participantData) {
+    const room = this.getRoom(roomId);
+
+    if (!room.host) {
+      throw new ConflictError('Room has no host');
+    }
+
+    if (room.participants.size >= config.maxParticipantsPerRoom) {
+      throw new ConflictError('Room is full');
+    }
+
+    if (room.participants.has(participantData.id)) {
+      throw new ConflictError('Participant already in room');
+    }
+
+    room.participants.set(participantData.id, {
+      id: participantData.id,
+      name: participantData.name,
+      joinedAt: Date.now(),
+      buzzed: false,
+      winner: false,
+    });
+
+    this.userRooms.set(participantData.id, roomId);
+    room.touch();
+
+    logger.debug('RoomManager', 'Participant joined room', {
+      roomId,
+      participantId: participantData.id,
+      totalParticipants: room.participants.size,
+    });
+
+    return room;
+  }
+
+  /**
+   * Leave room
+   */
+  leaveRoom(userId) {
+    const roomId = this.userRooms.get(userId);
+    if (!roomId) {
+      return null;
+    }
+
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      this.userRooms.delete(userId);
+      return null;
+    }
+
+    // If host leaves, delete entire room
+    if (room.host?.id === userId) {
+      this.deleteRoom(roomId);
+      this.userRooms.delete(userId);
+      logger.info('RoomManager', 'Room deleted - host left', { roomId });
+      return room;
+    }
+
+    // If participant leaves, just remove them
+    if (room.participants.has(userId)) {
+      room.participants.delete(userId);
+      this.userRooms.delete(userId);
+      room.touch();
+      logger.debug('RoomManager', 'Participant left room', {
+        roomId,
+        userId,
+        remainingParticipants: room.participants.size,
+      });
+    }
+
+    return room;
+  }
+
+  /**
+   * Start a round
+   */
+  startRound(roomId) {
+    const room = this.getRoom(roomId);
+
+    room.buzzerLocked = false;
+    room.winner = null;
+
+    // Reset all participants
+    room.participants.forEach((participant) => {
+      participant.buzzed = false;
+      participant.winner = false;
+    });
+
+    room.touch();
+    logger.debug('RoomManager', 'Round started', { roomId });
+
+    return room;
+  }
+
+  /**
+   * Record a buzz from participant
+   * Returns the winner info if this is the first buzz
+   */
+  recordBuzz(roomId, participantId, timestamp) {
+    const room = this.getRoom(roomId);
+
+    // Buzzer already locked
+    if (room.buzzerLocked) {
+      logger.debug('RoomManager', 'Buzz ignored - buzzer already locked', {
+        roomId,
+        participantId,
+      });
+      return { locked: true, winner: room.winner };
+    }
+
+    const participant = room.participants.get(participantId);
+    if (!participant) {
+      throw new NotFoundError('Participant');
+    }
+
+    // Participant already buzzed this round
+    if (participant.buzzed) {
+      logger.debug('RoomManager', 'Buzz ignored - participant already buzzed', {
+        roomId,
+        participantId,
+      });
+      return { locked: false, alreadyBuzzed: true };
+    }
+
+    // FIRST BUZZ - This is the winner!
+    room.buzzerLocked = true;
+    participant.buzzed = true;
+    participant.winner = true;
+    room.winner = participant;
+    room.touch();
+
+    logger.info('RoomManager', 'Winner determined', {
+      roomId,
+      winnerId: participantId,
+      winnerName: participant.name,
+    });
+
+    return { locked: true, winner: participant, isFirstBuzz: true };
+  }
+
+  /**
+   * Get participant user IDs in room (for broadcast)
+   */
+  getParticipantUserIds(roomId) {
+    const room = this.getRoom(roomId);
+    return Array.from(room.participants.keys());
+  }
+
+  /**
+   * Start cleanup interval to remove idle rooms
+   */
+  startCleanupInterval() {
+    setInterval(() => {
+      const idleRooms = Array.from(this.rooms.values()).filter((room) =>
+        room.isIdle()
+      );
+
+      idleRooms.forEach((room) => {
+        logger.info('RoomManager', 'Cleaning up idle room', { roomId: room.id });
+        this.deleteRoom(room.id);
+
+        // Clean up user mappings
+        if (room.host) {
+          this.userRooms.delete(room.host.id);
+        }
+        room.participants.forEach((participant) => {
+          this.userRooms.delete(participant.id);
+        });
+      });
+
+      if (idleRooms.length > 0) {
+        logger.debug('RoomManager', 'Cleanup completed', {
+          idleRoomsCount: idleRooms.length,
+          totalRooms: this.rooms.size,
+        });
+      }
+    }, 60 * 1000); // Run every minute
+  }
+}
+
+export default new RoomManager();
