@@ -4,128 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Buzzer - WebRTC Backend</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    
+    <!-- Modular CSS System -->
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/typography.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/app-layout.css">
+    <link rel="stylesheet" href="/css/theme-toggle.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>🎤 Quiz Buzzer</h1>
-            <p class="subtitle">Production-Ready WebRTC System</p>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="app-header-content">
+                <div class="app-logo">
+                    <span class="app-logo-icon">⚡</span>
+                    <span>Quiz Buzzer</span>
+                </div>
+                <nav class="app-nav">
+                    <a href="/landing.html" class="app-nav-link">← Back to Home</a>
+                </nav>
+            </div>
         </header>
 
-        <!-- Role Selection Screen -->
-        <div id="roleScreen" class="screen active">
-            <div class="content">
-                <h2>Select Your Role</h2>
-                <div class="button-group">
-                    <button id="hostBtn" class="btn btn-primary btn-large">
-                        👑 HOST<br><small>Coordinator</small>
-                    </button>
-                    <button id="participantBtn" class="btn btn-secondary btn-large">
-                        🎯 PARTICIPANT<br><small>Buzzer</small>
-                    </button>
+        <!-- Main Content -->
+        <main class="app-main">
+            <div class="app-content">
+                <!-- Role Selection Screen -->
+                <div id="roleScreen" class="screen active">
+                    <div class="content-card">
+                        <div class="screen-header">
+                            <h1 class="screen-title">Select Your Role</h1>
+                            <p class="screen-subtitle">Choose how you want to participate</p>
+                        </div>
+
+                        <div class="content-inner">
+                            <div class="button-group">
+                                <button id="hostBtn" class="btn btn-primary btn-lg">
+                                    <span style="font-size: 24px; margin-right: 8px;">👑</span>
+                                    <span>
+                                        <strong>Host</strong><br>
+                                        <small style="font-weight: 400; font-size: 12px;">Manage Quiz</small>
+                                    </span>
+                                </button>
+                                <button id="participantBtn" class="btn btn-secondary btn-lg">
+                                    <span style="font-size: 24px; margin-right: 8px;">🎯</span>
+                                    <span>
+                                        <strong>Participant</strong><br>
+                                        <small style="font-weight: 400; font-size: 12px;">Take Quiz</small>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="info-box">
+                                <strong class="info-box-title">How to Get Started:</strong>
+                                <ul>
+                                    <li>Host creates a new quiz room</li>
+                                    <li>Participants join using room ID</li>
+                                    <li>Host starts the buzzer round</li>
+                                    <li>First to buzz wins the round</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="info-box">
-                    <strong>How it works:</strong>
-                    <ul>
-                        <li>Host creates a room and waits for participants</li>
-                        <li>Participants join using the room ID</li>
-                        <li>Host starts the round</li>
-                        <li>First participant to buzz wins</li>
-                    </ul>
+
+                <!-- Host Screen -->
+                <div id="hostScreen" class="screen">
+                    <div class="content-card">
+                        <div class="screen-header">
+                            <h1 class="screen-title">🎤 Host Control Panel</h1>
+                            <p class="screen-subtitle">Manage your quiz session</p>
+                        </div>
+
+                        <div class="content-inner">
+                            <!-- Room Information -->
+                            <div class="room-info">
+                                <div class="room-info-item">
+                                    <span class="room-info-label">Room ID</span>
+                                    <span class="room-info-value" id="hostRoomId">-</span>
+                                </div>
+                                <div class="room-info-item">
+                                    <span class="room-info-label">Host Name</span>
+                                    <span class="room-info-value" id="hostHostName">-</span>
+                                </div>
+                                <div class="room-info-item">
+                                    <span class="room-info-label">Status</span>
+                                    <span class="room-info-value" id="hostStatus">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Start Button -->
+                            <button id="hostStartBtn" class="btn btn-primary btn-lg" style="width: 100%;">
+                                ▶ Start Round
+                            </button>
+
+                            <!-- Winner Display -->
+                            <div id="hostWinnerDisplay" class="winner-display" style="display: none;">
+                                <div class="winner-content">
+                                    <div class="winner-emoji">🏆</div>
+                                    <div class="winner-text">Winner Announced</div>
+                                    <div class="winner-name" id="hostWinnerName">-</div>
+                                </div>
+                            </div>
+
+                            <!-- Participants Section -->
+                            <div class="form-section">
+                                <h3 class="form-section-title">👥 Participants</h3>
+                                <div id="hostParticipantsList" class="participants-list">
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">👤</div>
+                                        <div class="empty-state-text">No participants yet. Share the room ID!</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Back Button -->
+                            <button class="btn btn-ghost btn-lg" style="width: 100%; margin-top: 20px;" onclick="location.reload()">
+                                ← Back to Role Selection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participant Screen -->
+                <div id="participantScreen" class="screen">
+                    <div class="content-card">
+                        <div class="screen-header">
+                            <h1 class="screen-title">🎯 Participant Control</h1>
+                            <p class="screen-subtitle">Join a quiz and test your skills</p>
+                        </div>
+
+                        <div class="content-inner">
+                            <!-- Join Section -->
+                            <div id="joinSection" class="form-section">
+                                <h3 class="form-section-title">Join Quiz Room</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="input-label">Room ID</label>
+                                        <input 
+                                            type="text" 
+                                            id="participantRoomIdInput" 
+                                            class="input-field" 
+                                            placeholder="Enter room ID"
+                                            maxlength="10"
+                                        >
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="input-label">Your Name</label>
+                                        <input 
+                                            type="text" 
+                                            id="participantNameInput" 
+                                            class="input-field" 
+                                            placeholder="Enter your name"
+                                            maxlength="20"
+                                        >
+                                    </div>
+                                </div>
+                                <button id="participantJoinBtn" class="btn btn-primary btn-lg" style="width: 100%;">
+                                    Join Room
+                                </button>
+                            </div>
+
+                            <!-- Buzzer Section -->
+                            <div id="buzzerSection" class="form-section" style="display: none;">
+                                <div class="status-bar">
+                                    <span class="status-label">Status:</span>
+                                    <span class="status-value" id="participantStatus">Ready</span>
+                                </div>
+
+                                <button id="participantBuzzBtn" class="buzz-button">
+                                    BUZZ!
+                                </button>
+
+                                <div id="participantWinnerDisplay" class="winner-display" style="display: none;">
+                                    <div class="winner-content">
+                                        <div class="winner-emoji" id="winnerEmoji">🎉</div>
+                                        <div class="winner-text" id="winnerText">Waiting for host...</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Back Button -->
+                            <button class="btn btn-ghost btn-lg" style="width: 100%; margin-top: 20px;" onclick="location.reload()">
+                                ← Back to Role Selection
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Host Screen -->
-        <div id="hostScreen" class="screen">
-            <div class="content">
-                <!-- Header Info -->
-                <div class="room-info">
-                    <div class="info-item">
-                        <span class="label">Room ID:</span>
-                        <span class="value" id="hostRoomId">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Host:</span>
-                        <span class="value" id="hostHostName">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Status:</span>
-                        <span class="value" id="hostStatus">-</span>
-                    </div>
-                </div>
-
-                <!-- Control Button -->
-                <button id="hostStartBtn" class="btn btn-primary btn-large">
-                    ▶ Start Round
-                </button>
-
-                <!-- Winner Display -->
-                <div id="hostWinnerDisplay" class="winner-display">
-                    <div>Waiting for buzzer...</div>
-                </div>
-
-                <!-- Participants List -->
-                <div class="section">
-                    <h3>Participants</h3>
-                    <div id="hostParticipantsList" class="participants-list">
-                        <div class="empty-message">No participants yet</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Participant Screen -->
-        <div id="participantScreen" class="screen">
-            <div class="content">
-                <!-- Join Section -->
-                <div id="joinSection" class="section">
-                    <h2>Join Room</h2>
-                    <div class="form-group">
-                        <input 
-                            type="text" 
-                            id="participantRoomIdInput" 
-                            class="input" 
-                            placeholder="Enter room ID..."
-                            maxlength="10"
-                        >
-                    </div>
-                    <div class="form-group">
-                        <input 
-                            type="text" 
-                            id="participantNameInput" 
-                            class="input" 
-                            placeholder="Enter your name..."
-                            maxlength="20"
-                        >
-                    </div>
-                    <button id="participantJoinBtn" class="btn btn-primary">
-                        Join Room
-                    </button>
-                </div>
-
-                <!-- Buzzer Section -->
-                <div id="buzzerSection" class="section">
-                    <div class="status-bar">
-                        <span class="label">Status:</span>
-                        <span id="participantStatus">-</span>
-                    </div>
-
-                    <button id="participantBuzzBtn" class="buzz-button">
-                        BUZZ!
-                    </button>
-
-                    <div id="participantWinnerDisplay" class="winner-display">
-                        <div>Waiting for host...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
     <!-- Socket.IO Library -->
     <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    
+    <!-- Theme Toggle -->
+    <script src="/js/theme-toggle.js"></script>
     
     <!-- Application Scripts -->
     <script type="module" src="/js/main.js"></script>

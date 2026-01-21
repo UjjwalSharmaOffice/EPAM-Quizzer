@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPAM Quiz Buzzer - Component Showcase</title>
+    
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/typography.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/theme-toggle.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+            padding: var(--space-12);
+        }
+
+        .showcase-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .showcase-header {
+            text-align: center;
+            margin-bottom: var(--space-16);
+        }
+
+        .showcase-header h1 {
+            color: var(--primary-color);
+            margin-bottom: var(--space-4);
+        }
+
+        .showcase-section {
+            margin-bottom: var(--space-16);
+            background: var(--white);
+            padding: var(--space-10);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .showcase-section-title {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--gray-900);
+            margin-bottom: var(--space-8);
+            border-bottom: 2px solid var(--primary-gradient);
+            padding-bottom: var(--space-4);
+        }
+
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .component-demo {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+            align-items: center;
+            padding: var(--space-6);
+            background: var(--gray-50);
+            border-radius: var(--radius-base);
+            border: 1px solid var(--gray-200);
+        }
+
+        .component-label {
+            font-size: var(--font-size-sm);
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .color-swatch {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .color-box {
+            width: 100%;
+            height: 100px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .color-name {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            color: var(--gray-900);
+        }
+
+        .color-value {
+            font-size: var(--font-size-xs);
+            color: var(--gray-600);
+            font-family: var(--font-family-mono);
+        }
+
+        .animation-demo {
+            width: 100px;
+            height: 100px;
+            background: var(--primary-gradient);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-6);
+        }
+    </style>
+</head>
+<body>
+    <div class="showcase-container">
+        <!-- Header -->
+        <div class="showcase-header">
+            <h1>⚡ EPAM Quiz Buzzer - Design System Showcase</h1>
+            <p style="color: var(--gray-600);">Premium Corporate UI Components & Styles</p>
+        </div>
+
+        <!-- Buttons Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Buttons</h2>
+            <div class="components-grid">
+                <div class="component-demo">
+                    <button class="btn btn-primary">Primary</button>
+                    <span class="component-label">btn-primary</span>
+                </div>
+                <div class="component-demo">
+                    <button class="btn btn-secondary">Secondary</button>
+                    <span class="component-label">btn-secondary</span>
+                </div>
+                <div class="component-demo">
+                    <button class="btn btn-outline">Outline</button>
+                    <span class="component-label">btn-outline</span>
+                </div>
+                <div class="component-demo">
+                    <button class="btn btn-ghost">Ghost</button>
+                    <span class="component-label">btn-ghost</span>
+                </div>
+                <div class="component-demo">
+                    <button class="btn btn-primary btn-sm">Small</button>
+                    <span class="component-label">btn-sm</span>
+                </div>
+                <div class="component-demo">
+                    <button class="btn btn-primary btn-lg">Large Button</button>
+                    <span class="component-label">btn-lg</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Badges</h2>
+            <div class="components-grid">
+                <div class="component-demo">
+                    <span class="badge badge-primary">Primary</span>
+                </div>
+                <div class="component-demo">
+                    <span class="badge badge-success">Success</span>
+                </div>
+                <div class="component-demo">
+                    <span class="badge badge-error">Error</span>
+                </div>
+                <div class="component-demo">
+                    <span class="badge badge-warning">Warning</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cards Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Cards</h2>
+            <div class="components-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Card Title</h3>
+                        <p class="card-subtitle">Card subtitle description</p>
+                    </div>
+                    <div class="card-body">
+                        <p>This is a standard card component with header, body, and footer sections.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Alerts</h2>
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                <div class="alert alert-success">
+                    <span>✓</span>
+                    <span>Success alert message</span>
+                </div>
+                <div class="alert alert-error">
+                    <span>✗</span>
+                    <span>Error alert message</span>
+                </div>
+                <div class="alert alert-warning">
+                    <span>⚠</span>
+                    <span>Warning alert message</span>
+                </div>
+                <div class="alert alert-info">
+                    <span>ℹ</span>
+                    <span>Information alert message</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colors Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Color Palette</h2>
+            <div class="color-grid">
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--primary-color);"></div>
+                    <span class="color-name">Primary</span>
+                    <span class="color-value">#667eea</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--secondary-color);"></div>
+                    <span class="color-name">Secondary</span>
+                    <span class="color-value">#f5576c</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--success);"></div>
+                    <span class="color-name">Success</span>
+                    <span class="color-value">#10b981</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--error);"></div>
+                    <span class="color-name">Error</span>
+                    <span class="color-value">#ef4444</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--warning);"></div>
+                    <span class="color-name">Warning</span>
+                    <span class="color-value">#f59e0b</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: var(--info);"></div>
+                    <span class="color-name">Info</span>
+                    <span class="color-value">#3b82f6</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animations Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Animations</h2>
+            <div class="demo-grid">
+                <div class="component-demo">
+                    <div class="animation-demo animate-fadeIn">Fade In</div>
+                </div>
+                <div class="component-demo">
+                    <div class="animation-demo animate-slideInUp">Slide</div>
+                </div>
+                <div class="component-demo">
+                    <div class="animation-demo animate-bounce">Bounce</div>
+                </div>
+                <div class="component-demo">
+                    <div class="animation-demo animate-pulse">Pulse</div>
+                </div>
+                <div class="component-demo">
+                    <div class="animation-demo animate-spin">Spin</div>
+                </div>
+                <div class="component-demo">
+                    <div class="animation-demo animate-float">Float</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typography Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Typography</h2>
+            <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+                <div>
+                    <h1>Heading 1 (48px, Bold)</h1>
+                    <p class="text-muted">font-size: var(--font-size-5xl)</p>
+                </div>
+                <div>
+                    <h2>Heading 2 (36px, Bold)</h2>
+                    <p class="text-muted">font-size: var(--font-size-4xl)</p>
+                </div>
+                <div>
+                    <h3>Heading 3 (30px, Semibold)</h3>
+                    <p class="text-muted">font-size: var(--font-size-3xl)</p>
+                </div>
+                <div>
+                    <h4>Heading 4 (24px, Semibold)</h4>
+                    <p class="text-muted">font-size: var(--font-size-2xl)</p>
+                </div>
+                <div>
+                    <p>Regular body text (16px, Normal). Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    <p class="text-muted">font-size: var(--font-size-base)</p>
+                </div>
+                <div>
+                    <p class="text-sm">Small text (14px, Normal). Perfect for captions and descriptions.</p>
+                    <p class="text-muted">font-size: var(--font-size-sm)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forms Showcase -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Forms</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-6);">
+                <div class="form-group">
+                    <label class="input-label">Text Input</label>
+                    <input class="input-field" type="text" placeholder="Enter text...">
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Email Input</label>
+                    <input class="input-field" type="email" placeholder="Enter email...">
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Password Input</label>
+                    <input class="input-field" type="password" placeholder="Enter password...">
+                </div>
+                <div class="form-group">
+                    <label class="input-label">Number Input</label>
+                    <input class="input-field" type="number" placeholder="Enter number...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading States -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Loading & States</h2>
+            <div class="components-grid">
+                <div class="component-demo">
+                    <div class="spinner"></div>
+                    <span class="component-label">Spinner</span>
+                </div>
+                <div class="component-demo">
+                    <button class="btn btn-primary" disabled>Disabled</button>
+                    <span class="component-label">Disabled State</span>
+                </div>
+                <div class="component-demo">
+                    <div class="skeleton" style="width: 100%; height: 50px;"></div>
+                    <span class="component-label">Skeleton Loader</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spacing System -->
+        <div class="showcase-section">
+            <h2 class="showcase-section-title">Spacing System (4px Grid)</h2>
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                <div style="display: flex; align-items: center; gap: var(--space-4);">
+                    <div style="background: var(--primary-gradient); width: 20px; height: 20px; border-radius: 3px;"></div>
+                    <span>space-1 = 4px</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-4);">
+                    <div style="background: var(--primary-gradient); width: 40px; height: 20px; border-radius: 3px;"></div>
+                    <span>space-2 = 8px</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-4);">
+                    <div style="background: var(--primary-gradient); width: 60px; height: 20px; border-radius: 3px;"></div>
+                    <span>space-3 = 12px</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-4);">
+                    <div style="background: var(--primary-gradient); width: 100px; height: 20px; border-radius: 3px;"></div>
+                    <span>space-6 = 24px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme-toggle.js"></script>
+</body>
+</html>

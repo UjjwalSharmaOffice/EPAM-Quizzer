@@ -1,0 +1,132 @@
+/* ==========================================
+   THEME TOGGLE COMPONENT
+   ========================================== */
+
+.theme-toggle-container {
+    position: fixed;
+    top: var(--space-6);
+    right: var(--space-6);
+    z-index: var(--z-dropdown);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: var(--gray-100);
+    border: 2px solid var(--gray-200);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-btn:hover {
+    background: var(--gray-200);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+}
+
+.theme-toggle-btn:active {
+    transform: scale(0.98);
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .theme-toggle-btn {
+    background: var(--gray-200);
+    border-color: var(--gray-300);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+    background: var(--gray-300);
+}
+
+/* Theme Label (Optional) */
+.theme-label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--gray-600);
+    white-space: nowrap;
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .theme-label {
+        display: block;
+    }
+}
+
+/* Smooth Transition for Theme Change */
+*,
+*::before,
+*::after {
+    transition: background-color var(--transition-base), 
+                color var(--transition-base),
+                border-color var(--transition-base),
+                box-shadow var(--transition-base);
+}
+
+/* Prevent animation on page load */
+.preload * {
+    transition: none !important;
+}
+
+/* Animation for theme switch */
+.theme-toggle-btn.switching {
+    animation: themeSwitchSpin 0.6s ease-in-out;
+}
+
+@keyframes themeSwitchSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.05); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Ensure theme toggle stays accessible in dark mode */
+[data-theme="dark"] .theme-toggle-container {
+    position: fixed;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    .theme-toggle-container {
+        top: var(--space-4);
+        right: var(--space-4);
+    }
+
+    .theme-toggle-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .theme-label {
+        display: none !important;
+    }
+}
+
+/* Accessibility - Focus Visible */
+.theme-toggle-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Prevents flash of wrong theme on page load */
+html {
+    scroll-behavior: smooth;
+}
+
+body.theme-transition,
+body.theme-transition *,
+body.theme-transition *:before,
+body.theme-transition *:after {
+    transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
