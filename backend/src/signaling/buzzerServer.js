@@ -14,13 +14,97 @@ class BuzzerServer {
 
   setupEventHandlers() {
     this.io.on('connection', (socket) => {
+      logger.debug('BuzzerServer', 'Client connected', {
+        socketId: socket.id,
+      });
+
+      socket.on('host:createRoom', (data, callback) =>
+        this.handleHostCreateRoom(socket, data, callback)
+      );
+      socket.on('participant:joinRoom', (data, callback) =>
+        this.handleParticipantJoinRoom(socket, data, callback)
+      );
       socket.on('buzzer:startRound', (data, callback) =>
         this.handleStartRound(socket, data, callback)
       );
       socket.on('buzzer:buzz', (data, callback) =>
         this.handleBuzz(socket, data, callback)
       );
+      socket.on('disconnect', () => this.handleDisconnect(socket));
     });
+  }
+
+  /**
+   * Host creates room
+   */
+  handleHostCreateRoom(socket, data, callback) {
+    try {
+      this.validateData(data, ['name']);
+
+      const room = roomManager.createRoom();
+      const roomWithHost = roomManager.joinAsHost(room.id, {
+        id: socket.id,
+        name: data.name,
+      });
+
+      socket.join(`room:${room.id}`);
+      socket.data.room = room.id;
+      socket.data.role = 'host';
+      socket.data.name = data.name;
+
+      logger.info('BuzzerServer', 'Host created room', {
+        socketId: socket.id,
+        roomId: room.id,
+        hostName: data.name,
+      });
+
+      callback({ success: true, room: roomWithHost.getSummary() });
+    } catch (error) {
+      logger.error('BuzzerServer', 'Error creating room', {
+        error: error.message,
+        socketId: socket.id,
+      });
+      callback({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * Participant joins room
+   */
+  handleParticipantJoinRoom(socket, data, callback) {
+    try {
+      this.validateData(data, ['roomId', 'name']);
+
+      const room = roomManager.joinAsParticipant(data.roomId, {
+        id: socket.id,
+        name: data.name,
+      });
+
+      socket.join(`room:${data.roomId}`);
+      socket.data.room = data.roomId;
+      socket.data.role = 'participant';
+      socket.data.name = data.name;
+
+      logger.info('BuzzerServer', 'Participant joined room', {
+        socketId: socket.id,
+        roomId: data.roomId,
+        participantName: data.name,
+      });
+
+      this.io.to(`room:${data.roomId}`).emit('buzzer:participantJoined', {
+        participantId: socket.id,
+        participantName: data.name,
+        room: room.getSummary(),
+      });
+
+      callback({ success: true, room: room.getSummary() });
+    } catch (error) {
+      logger.error('BuzzerServer', 'Error joining room', {
+        error: error.message,
+        socketId: socket.id,
+      });
+      callback({ success: false, error: error.message });
+    }
   }
 
   /**
@@ -147,6 +231,40 @@ class BuzzerServer {
 
     if (!socket.data.room) {
       throw new NotFoundError('Room');
+    }
+  }
+
+  /**
+   * Handle disconnect
+   */
+  handleDisconnect(socket) {
+    try {
+      const room = roomManager.leaveRoom(socket.id);
+
+      if (room) {
+        logger.info('BuzzerServer', 'User disconnected', {
+          socketId: socket.id,
+          role: socket.data.role,
+          roomId: socket.data.room,
+        });
+
+        if (socket.data.role === 'host') {
+          this.io.to(`room:${socket.data.room}`).emit('buzzer:hostLeft', {
+            roomId: socket.data.room,
+          });
+        } else {
+          this.io.to(`room:${socket.data.room}`).emit('buzzer:participantLeft', {
+            participantId: socket.id,
+            participantName: socket.data.name,
+            room: room.getSummary(),
+          });
+        }
+      }
+    } catch (error) {
+      logger.error('BuzzerServer', 'Error handling disconnect', {
+        error: error.message,
+        socketId: socket.id,
+      });
     }
   }
 }

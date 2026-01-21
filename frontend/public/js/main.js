@@ -1,6 +1,4 @@
 import SignalingClient from './api/signalingClient.js';
-import PeerManager from './webrtc/peerManager.js';
-import DataChannelManager from './webrtc/dataChannelManager.js';
 import HostController from './host/hostController.js';
 import ParticipantController from './participant/participantController.js';
 import UIManager from './ui/uiManager.js';
@@ -11,8 +9,6 @@ import UIManager from './ui/uiManager.js';
 class App {
   constructor() {
     this.signalingClient = new SignalingClient('http://localhost:3000');
-    this.peerManager = new PeerManager();
-    this.dataChannelManager = new DataChannelManager();
     this.uiManager = new UIManager();
 
     this.hostController = null;
@@ -25,7 +21,6 @@ class App {
    * Initialize UI event listeners
    */
   initializeEventListeners() {
-    // Role selection
     document.getElementById('hostBtn').addEventListener('click', () =>
       this.selectHostRole()
     );
@@ -33,12 +28,10 @@ class App {
       this.selectParticipantRole()
     );
 
-    // Host controls
     document.getElementById('hostStartBtn').addEventListener('click', () =>
       this.hostStartRound()
     );
 
-    // Participant controls
     document.getElementById('participantJoinBtn').addEventListener('click', () =>
       this.participantJoin()
     );
@@ -55,17 +48,10 @@ class App {
       const hostName = this.uiManager.getHostNameInput();
       if (!hostName) return;
 
-      // Connect to server
       await this.signalingClient.connect();
 
-      // Create host controller
-      this.hostController = new HostController(
-        this.signalingClient,
-        this.peerManager,
-        this.dataChannelManager
-      );
+      this.hostController = new HostController(this.signalingClient);
 
-      // Setup host event listeners
       this.hostController.on('roomCreated', (room) => {
         this.uiManager.showHostScreen();
         this.uiManager.updateHostRoom(room.id, hostName);
@@ -87,14 +73,8 @@ class App {
         );
       });
 
-      this.hostController.on('participantConnected', (data) => {
-        console.log('[App] Participant connected:', data.peerId);
-        this.uiManager.updateHostStatus('Participant connected');
-      });
-
       this.hostController.on('winner', (winner) => {
         this.uiManager.updateHostWinner(winner);
-        this.hostController.getRoomInfo(); // Update list
         this.uiManager.updateHostParticipants(this.hostController.getRoomInfo().participants);
       });
 
@@ -104,7 +84,6 @@ class App {
         this.uiManager.updateHostParticipants(this.hostController.getRoomInfo().participants);
       });
 
-      // Create room
       await this.hostController.createRoom(hostName);
     } catch (error) {
       this.uiManager.showError(error.message);
@@ -117,25 +96,15 @@ class App {
    */
   async selectParticipantRole() {
     try {
-      // Connect to server
       await this.signalingClient.connect();
 
-      // Create participant controller
-      this.participantController = new ParticipantController(
-        this.signalingClient,
-        this.peerManager,
-        this.dataChannelManager
-      );
+      this.participantController = new ParticipantController(this.signalingClient);
 
-      // Setup participant event listeners
       this.participantController.on('joinedRoom', (room) => {
         this.uiManager.showParticipantScreen();
-      });
-
-      this.participantController.on('connectedToHost', () => {
         const inputs = this.uiManager.getParticipantInputs();
         this.uiManager.showParticipantBuzzer(inputs.name);
-        this.uiManager.updateParticipantStatus('Connected to host - Ready to buzz');
+        this.uiManager.updateParticipantStatus('Connected - waiting for round to start');
       });
 
       this.participantController.on('roundStarted', () => {
@@ -223,7 +192,6 @@ class App {
   }
 }
 
-// Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   window.app = new App();
   console.log('[App] Application initialized');

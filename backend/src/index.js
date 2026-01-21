@@ -3,7 +3,6 @@ import { Server as SocketIOServer } from 'socket.io';
 import logger from './utils/logger.js';
 import config from './config/config.js';
 import { createApp } from './server/app.js';
-import SignalingServer from './signaling/signalingServer.js';
 import BuzzerServer from './signaling/buzzerServer.js';
 
 /**
@@ -25,8 +24,7 @@ async function startServer() {
       },
     });
 
-    // Initialize signaling servers
-    new SignalingServer(io);
+    // Initialize buzzer server
     new BuzzerServer(io);
 
     // Start server
