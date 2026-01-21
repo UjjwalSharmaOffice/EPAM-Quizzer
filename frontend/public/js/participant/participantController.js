@@ -53,8 +53,8 @@ class ParticipantController {
       this.handleRoundStart();
     });
 
-    this.signalingClient.on('buzzer:winner', (data) => {
-      this.handleWinner(data);
+    this.signalingClient.on('buzzer:buzzesUpdated', (data) => {
+      this.handleBuzzesUpdated(data);
     });
   }
 
@@ -70,17 +70,33 @@ class ParticipantController {
   }
 
   /**
-   * Handle winner announcement
+   * Handle buzzes updated
    */
-  handleWinner(data) {
-    this.buzzerLocked = true;
-    const isWinner = data.winnerId === this.participantId;
+  handleBuzzesUpdated(data) {
+    const buzzes = data.buzzes;
 
-    console.log('[ParticipantController] Winner:', data.winnerName, isWinner ? '(YOU)' : '');
-    this.emit('winner', {
-      winnerId: data.winnerId,
-      winnerName: data.winnerName,
-      isWinner,
+    // Find my position
+    const myBuzzIndex = buzzes.findIndex(b => b.participantId === this.participantId);
+    const isWinner = myBuzzIndex === 0;
+    const isBuzzed = myBuzzIndex !== -1;
+    const firstBuzz = buzzes[0];
+
+    // Only lock local buzzer if I have already buzzed
+    if (isBuzzed) {
+      this.buzzerLocked = true;
+    }
+
+    console.log('[ParticipantController] Buzzes updated. Am I winner?', isWinner);
+
+    this.emit('buzzesUpdated', {
+      buzzes,
+      myState: {
+        isWinner,
+        isBuzzed,
+        rank: isBuzzed ? myBuzzIndex + 1 : null,
+        buzzTime: isBuzzed ? buzzes[myBuzzIndex].timestamp : null
+      },
+      winnerName: firstBuzz ? firstBuzz.name : null
     });
   }
 

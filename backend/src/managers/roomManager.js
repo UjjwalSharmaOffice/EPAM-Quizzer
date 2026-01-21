@@ -13,7 +13,7 @@ class Room {
     this.host = null;
     this.participants = new Map(); // participantId -> participant
     this.buzzerLocked = false;
-    this.winner = null;
+    this.buzzes = []; // Array of { participantId, name, timestamp, diff }
     this.createdAt = Date.now();
     this.lastActivity = Date.now();
   }
@@ -41,7 +41,7 @@ class Room {
       hostId: this.host?.id || null,
       participantCount: this.participants.size,
       buzzerLocked: this.buzzerLocked,
-      winner: this.winner?.id || null,
+      buzzes: this.buzzes,
     };
   }
 }
@@ -150,7 +150,6 @@ class RoomManager {
       name: participantData.name,
       joinedAt: Date.now(),
       buzzed: false,
-      winner: false,
     });
 
     this.userRooms.set(participantData.id, roomId);
@@ -210,12 +209,11 @@ class RoomManager {
     const room = this.getRoom(roomId);
 
     room.buzzerLocked = false;
-    room.winner = null;
+    room.buzzes = [];
 
     // Reset all participants
     room.participants.forEach((participant) => {
       participant.buzzed = false;
-      participant.winner = false;
     });
 
     room.touch();
@@ -226,19 +224,10 @@ class RoomManager {
 
   /**
    * Record a buzz from participant
-   * Returns the winner info if this is the first buzz
+   * Returns the updated buzzes list
    */
   recordBuzz(roomId, participantId, timestamp) {
     const room = this.getRoom(roomId);
-
-    // Buzzer already locked
-    if (room.buzzerLocked) {
-      logger.debug('RoomManager', 'Buzz ignored - buzzer already locked', {
-        roomId,
-        participantId,
-      });
-      return { locked: true, winner: room.winner };
-    }
 
     const participant = room.participants.get(participantId);
     if (!participant) {
@@ -251,23 +240,55 @@ class RoomManager {
         roomId,
         participantId,
       });
-      return { locked: false, alreadyBuzzed: true };
+      return { alreadyBuzzed: true, buzzes: room.buzzes };
     }
 
-    // FIRST BUZZ - This is the winner!
-    room.buzzerLocked = true;
+    // Record buzz with SERVER timestamp to ensure fair ordering
+    // Client timestamps (performance.now()) are relative to page load and cannot be compared across devices
+    const serverTimestamp = Date.now();
     participant.buzzed = true;
-    participant.winner = true;
-    room.winner = participant;
+
+    // Calculate diff from first buzz
+    let diff = 0;
+    if (room.buzzes.length > 0) {
+      diff = serverTimestamp - room.buzzes[0].timestamp;
+    }
+
+    const buzzEntry = {
+      participantId,
+      name: participant.name,
+      timestamp: serverTimestamp,
+      diff
+    };
+
+    room.buzzes.push(buzzEntry);
+
+    // No need to sort, push order is the natural arrival order
+    // room.buzzes.sort((a, b) => a.timestamp - b.timestamp);
+
+    // Re-calculate diffs after sort to be safe
+    if (room.buzzes.length > 0) {
+      const firstTimestamp = room.buzzes[0].timestamp;
+      room.buzzes.forEach(b => {
+        b.diff = b.timestamp - firstTimestamp;
+      });
+    }
+
+    // We can optionally lock the buzzer after N buzzes, or keep it open.
+    // User asked for "sequence", implies multiple. 
+    // We will set buzzerLocked to true if we want to stop accepting after some limit, 
+    // but for now let's keep it open or maybe lock after all participants have buzzed?
+    // User didn't specify a limit, so we won't lock global buzzer.
+
     room.touch();
 
-    logger.info('RoomManager', 'Winner determined', {
+    logger.info('RoomManager', 'Buzz recorded', {
       roomId,
-      winnerId: participantId,
-      winnerName: participant.name,
+      participantId,
+      buzzCount: room.buzzes.length
     });
 
-    return { locked: true, winner: participant, isFirstBuzz: true };
+    return { buzzes: room.buzzes };
   }
 
   /**

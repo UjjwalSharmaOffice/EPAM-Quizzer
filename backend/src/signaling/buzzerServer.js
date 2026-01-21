@@ -158,33 +158,7 @@ class BuzzerServer {
         data.timestamp
       );
 
-      if (result.locked && result.isFirstBuzz) {
-        // This was the winning buzz!
-        logger.info('BuzzerServer', 'Participant buzzed - Winner!', {
-          roomId,
-          participantId: socket.data.name,
-          timestamp: data.timestamp,
-        });
-
-        const room = roomManager.getRoom(roomId);
-
-        // Broadcast winner to all
-        this.io.to(`room:${roomId}`).emit('buzzer:winner', {
-          winnerId: participantId,
-          winnerName: socket.data.name,
-          room: room.getSummary(),
-        });
-
-        callback({ success: true, winner: true });
-      } else if (result.locked) {
-        // Buzzer already locked by someone else
-        logger.debug('BuzzerServer', 'Buzz ignored - buzzer already locked', {
-          roomId,
-          participantId,
-        });
-
-        callback({ success: false, error: 'Buzzer already locked', locked: true });
-      } else if (result.alreadyBuzzed) {
+      if (result.alreadyBuzzed) {
         // Participant already buzzed this round
         logger.debug('BuzzerServer', 'Buzz ignored - already buzzed', {
           roomId,
@@ -196,7 +170,26 @@ class BuzzerServer {
           error: 'Already buzzed this round',
           alreadyBuzzed: true,
         });
+        return;
       }
+
+      // Valid buzz recorded
+      logger.info('BuzzerServer', 'Participant buzzed', {
+        roomId,
+        participantId: socket.data.name,
+        timestamp: data.timestamp,
+        buzzCount: result.buzzes.length
+      });
+
+      const room = roomManager.getRoom(roomId);
+
+      // Broadcast updated buzz list to all
+      this.io.to(`room:${roomId}`).emit('buzzer:buzzesUpdated', {
+        buzzes: result.buzzes,
+        room: room.getSummary(),
+      });
+
+      callback({ success: true, buzzes: result.buzzes });
     } catch (error) {
       logger.error('BuzzerServer', 'Error processing buzz', {
         error: error.message,

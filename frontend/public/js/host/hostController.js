@@ -47,8 +47,9 @@ class HostController {
       this.handleParticipantLeft(data);
     });
 
-    this.signalingClient.on('buzzer:winner', (data) => {
-      this.handleWinner(data);
+    this.signalingClient.on('buzzer:buzzesUpdated', (data) => {
+      console.log('[HostController] Received buzzesUpdated from client', data);
+      this.handleBuzzesUpdated(data.buzzes);
     });
 
     this.signalingClient.on('buzzer:roundStarted', (data) => {
@@ -90,21 +91,28 @@ class HostController {
   }
 
   /**
-   * Handle winner announcement
+   * Handle buzzes updated
    */
-  handleWinner(data) {
-    const participantId = data.winnerId;
-    const participant = this.participants.get(participantId);
+  handleBuzzesUpdated(buzzes) {
+    // Reset ranking for all first
+    this.participants.forEach(p => {
+      p.rank = null;
+      p.buzzed = false;
+    });
 
-    if (participant) {
-      this.buzzerLocked = true;
-      participant.buzzed = true;
-      participant.winner = true;
-      this.winner = participant;
+    // Update local participants state with rank
+    buzzes.forEach((buzz, index) => {
+      const p = this.participants.get(buzz.participantId);
+      if (p) {
+        p.buzzed = true;
+        p.buzzTimestamp = buzz.timestamp;
+        p.rank = index + 1;
+        p.winner = index === 0;
+      }
+    });
 
-      console.log('[HostController] Winner:', participant.name);
-      this.emit('winner', participant);
-    }
+    console.log('[HostController] Buzzes updated:', buzzes.length);
+    this.emit('buzzesUpdated', buzzes);
   }
 
   /**

@@ -57,6 +57,7 @@ class SignalingClient {
    * Setup default event listeners
    */
   setupDefaultListeners() {
+    console.log('[SignalingClient] Setting up default listeners');
     // Signaling events
     this.socket.on('signaling:receiveOffer', (data) => {
       this.emit('signaling:offer', data);
@@ -87,8 +88,9 @@ class SignalingClient {
       this.emit('buzzer:roundStarted', data);
     });
 
-    this.socket.on('buzzer:winner', (data) => {
-      this.emit('buzzer:winner', data);
+    this.socket.on('buzzer:buzzesUpdated', (data) => {
+      console.log('[SignalingClient] Received buzzesUpdated event', data);
+      this.emit('buzzer:buzzesUpdated', data);
     });
   }
 

@@ -73,14 +73,14 @@ class App {
         );
       });
 
-      this.hostController.on('winner', (winner) => {
-        this.uiManager.updateHostWinner(winner);
+      this.hostController.on('buzzesUpdated', (buzzes) => {
+        this.uiManager.updateHostBuzzList(buzzes);
         this.uiManager.updateHostParticipants(this.hostController.getRoomInfo().participants);
       });
 
       this.hostController.on('roundStarted', () => {
         this.uiManager.updateHostStatus('Round active - waiting for buzz');
-        this.uiManager.updateHostWinner(null);
+        this.uiManager.updateHostBuzzList(null);
         this.uiManager.updateHostParticipants(this.hostController.getRoomInfo().participants);
       });
 
@@ -109,7 +109,7 @@ class App {
 
       this.participantController.on('roundStarted', () => {
         this.uiManager.setParticipantBuzzButtonState(true, false, false);
-        this.uiManager.updateParticipantWinner(null);
+        this.uiManager.updateParticipantBuzzStatus(null);
         this.uiManager.updateParticipantStatus('Round active - Ready to buzz!');
       });
 
@@ -118,10 +118,14 @@ class App {
         this.uiManager.updateParticipantStatus('You buzzed!');
       });
 
-      this.participantController.on('winner', (data) => {
-        this.uiManager.updateParticipantWinner(data);
+      this.participantController.on('buzzesUpdated', (data) => {
+        this.uiManager.updateParticipantBuzzStatus(data);
         this.uiManager.updateParticipantStatus(
-          data.isWinner ? 'You are the winner!' : `${data.winnerName} is the winner`
+          data.myState.isWinner
+            ? 'You are the winner!'
+            : data.myState.isBuzzed
+              ? `You buzzed (Rank #${data.myState.rank})`
+              : `${data.winnerName} buzzed first`
         );
       });
 
