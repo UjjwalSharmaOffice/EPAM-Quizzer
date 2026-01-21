@@ -1,0 +1,35 @@
+{
+  "name": "epam-quizzer",
+  "version": "1.0.0",
+  "description": "Quiz buzzer system with WebRTC signaling",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "postinstall": "npm run install:all",
+    "start": "npm run start:backend",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "echo 'Build complete'",
+    "lint": "cd backend && npm run lint"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "keywords": [
+    "webrtc",
+    "signaling",
+    "quiz",
+    "buzzer"
+  ],
+  "author": "EPAM Quizzer",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
