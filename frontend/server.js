@@ -1,9 +1,8 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const url = require('url');
-
-const PORT = 8080;
+//server port was hardcoded
+const PORT = process.env.PORT || 8080;  
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 const server = http.createServer((req, res) => {
@@ -21,7 +20,6 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Try to serve the file
   fs.readFile(filePath, (err, data) => {
     if (err) {
       if (err.code === 'ENOENT') {
@@ -34,7 +32,6 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    // Determine content type
     const ext = path.extname(filePath).toLowerCase();
     const contentTypes = {
       '.html': 'text/html; charset=utf-8',
@@ -57,7 +54,6 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`🎨 Frontend server running on http://localhost:${PORT}`);
-  console.log(`📂 Serving: ${PUBLIC_DIR}`);
-  console.log(`\nOpen in browser: http://localhost:${PORT}/index.html\n`);
+  console.log(`🎨 Frontend server running on port ${PORT}`);
+  console.log(`📂 Serving directory: ${PUBLIC_DIR}`);
 });
