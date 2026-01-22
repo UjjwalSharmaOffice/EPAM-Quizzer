@@ -278,6 +278,14 @@ class UIManager {
   }
 
   /**
+   * Get host room ID input
+   */
+  getHostRoomIdInput() {
+    const input = prompt('Enter custom Room ID (optional, leave blank for random):');
+    return input ? input.trim() : null;
+  }
+
+  /**
    * Get participant inputs
    */
   getParticipantInputs() {

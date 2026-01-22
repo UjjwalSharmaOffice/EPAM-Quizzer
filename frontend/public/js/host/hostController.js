@@ -16,9 +16,9 @@ class HostController {
   /**
    * Create room and initialize as host
    */
-  async createRoom(hostName) {
+  async createRoom(hostName, roomId = null) {
     try {
-      const response = await this.signalingClient.hostCreateRoom(hostName);
+      const response = await this.signalingClient.hostCreateRoom(hostName, roomId);
 
       this.hostId = this.signalingClient.getSocketId();
       this.roomId = response.room.id;

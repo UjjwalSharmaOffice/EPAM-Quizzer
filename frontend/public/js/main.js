@@ -48,6 +48,8 @@ class App {
       const hostName = this.uiManager.getHostNameInput();
       if (!hostName) return;
 
+      const roomId = this.uiManager.getHostRoomIdInput();
+
       await this.signalingClient.connect();
 
       this.hostController = new HostController(this.signalingClient);
@@ -84,7 +86,7 @@ class App {
         this.uiManager.updateHostParticipants(this.hostController.getRoomInfo().participants);
       });
 
-      await this.hostController.createRoom(hostName);
+      await this.hostController.createRoom(hostName, roomId);
     } catch (error) {
       this.uiManager.showError(error.message);
       console.error('[App] Error selecting host role:', error);

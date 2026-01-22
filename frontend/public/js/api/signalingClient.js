@@ -139,8 +139,8 @@ class SignalingClient {
   }
 
   // HOST OPERATIONS
-  async hostCreateRoom(name) {
-    return this.send('host:createRoom', { name });
+  async hostCreateRoom(name, roomId = null) {
+    return this.send('host:createRoom', { name, roomId });
   }
 
   async hostSendOffer(participantId, offer) {

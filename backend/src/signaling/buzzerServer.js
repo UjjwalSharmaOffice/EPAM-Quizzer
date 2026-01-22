@@ -41,7 +41,9 @@ class BuzzerServer {
     try {
       this.validateData(data, ['name']);
 
-      const room = roomManager.createRoom();
+      this.validateData(data, ['name']); // roomId is optional
+
+      const room = roomManager.createRoom(data.roomId);
       const roomWithHost = roomManager.joinAsHost(room.id, {
         id: socket.id,
         name: data.name,

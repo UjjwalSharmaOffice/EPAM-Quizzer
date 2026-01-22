@@ -60,11 +60,25 @@ class RoomManager {
   /**
    * Create a new room
    */
-  createRoom() {
-    const roomId = uuidv4().substring(0, 8);
+  createRoom(customId = null) {
+    let roomId;
+
+    if (customId) {
+      if (this.rooms.has(customId)) {
+        throw new ConflictError('Room ID already exists');
+      }
+      roomId = customId;
+    } else {
+      roomId = uuidv4().substring(0, 8);
+      // Ensure unlikely collision
+      while (this.rooms.has(roomId)) {
+        roomId = uuidv4().substring(0, 8);
+      }
+    }
+
     const room = new Room(roomId);
     this.rooms.set(roomId, room);
-    logger.info('RoomManager', 'Room created', { roomId });
+    logger.info('RoomManager', 'Room created', { roomId, isCustom: !!customId });
     return room;
   }
 
