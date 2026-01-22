@@ -13,14 +13,34 @@ class SignalingClient {
   /**
    * Connect to signaling server
    */
-  async connect() {
+  /**
+   * Connect to signaling server
+   */
+  async connect(url = null) {
+    if (url) {
+      this.serverUrl = url;
+    }
+
     return new Promise((resolve, reject) => {
+      if (this.socket && this.socket.connected) {
+        resolve(this.socket.id);
+        return;
+      }
+
+      // Close existing if any
+      if (this.socket) {
+        this.socket.close();
+      }
+
       try {
+        console.log('[SignalingClient] Connecting to:', this.serverUrl);
         this.socket = io(this.serverUrl, {
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 10,
+          reconnection: false, // Reverting to manual control for stability
+          timeout: 20000,
+          extraHeaders: {
+            "ngrok-skip-browser-warning": "true",
+            "Bypass-Tunnel-Reminder": "true"
+          }
         });
 
         this.socket.on('connect', () => {
@@ -30,7 +50,7 @@ class SignalingClient {
         });
 
         this.socket.on('connect_error', (error) => {
-          console.error('[SignalingClient] Connection error', error);
+          console.error('[SignalingClient] Connection error:', error.message);
           reject(error);
         });
 
@@ -131,10 +151,10 @@ class SignalingClient {
         }
       });
 
-      // Timeout after 10 seconds
+      // Timeout after 30 seconds
       setTimeout(() => {
         reject(new Error('Request timeout'));
-      }, 10000);
+      }, 30000);
     });
   }
 

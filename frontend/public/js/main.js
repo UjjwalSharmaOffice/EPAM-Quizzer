@@ -8,13 +8,58 @@ import UIManager from './ui/uiManager.js';
  */
 class App {
   constructor() {
-    this.signalingClient = new SignalingClient('http://localhost:3000');
     this.uiManager = new UIManager();
+
+    // Default to localhost or existing session URL
+    const sessionUrl = sessionStorage.getItem('quizzer_server_url');
+    // If running on localhost (dev), default to localhost:3000
+    // If running on a domain (ngrok/localtunnel), default to that domain (origin)
+    const defaultUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:3000'
+      : window.location.origin;
+
+    const initialUrl = sessionUrl || defaultUrl;
+
+    console.log('[App] Initializing with server URL:', initialUrl);
+    this.signalingClient = new SignalingClient(initialUrl);
 
     this.hostController = null;
     this.participantController = null;
 
     this.initializeEventListeners();
+  }
+
+  /**
+   * Connect to server with fallback to user input
+   */
+  /**
+   * Connect to server with fallback to user input
+   */
+  async connectToServer() {
+    try {
+      if (this.signalingClient.isConnected()) return;
+
+      this.uiManager.showLoading('Connecting to server...');
+      await this.signalingClient.connect();
+      this.uiManager.hideLoading();
+    } catch (error) {
+      this.uiManager.hideLoading();
+      console.log('Connection failed, prompting user...');
+
+      const newUrl = this.uiManager.getServerUrlInput(true); // Force prompt
+      if (newUrl) {
+        this.uiManager.showLoading('Connecting to new URL...');
+        try {
+          await this.signalingClient.connect(newUrl);
+        } catch (e) {
+          throw e; // Rethrow to be caught by caller
+        } finally {
+          this.uiManager.hideLoading();
+        }
+      } else {
+        throw new Error('No server URL provided');
+      }
+    }
   }
 
   /**
@@ -38,6 +83,10 @@ class App {
     document.getElementById('participantBuzzBtn').addEventListener('click', () =>
       this.participantBuzz()
     );
+
+    document.getElementById('changeServerBtn').addEventListener('click', () => {
+      this.uiManager.changeServerUrl();
+    });
   }
 
   /**
@@ -50,7 +99,7 @@ class App {
 
       const roomId = this.uiManager.getHostRoomIdInput();
 
-      await this.signalingClient.connect();
+      await this.connectToServer();
 
       this.hostController = new HostController(this.signalingClient);
 
@@ -98,7 +147,7 @@ class App {
    */
   async selectParticipantRole() {
     try {
-      await this.signalingClient.connect();
+      await this.connectToServer();
 
       this.participantController = new ParticipantController(this.signalingClient);
 

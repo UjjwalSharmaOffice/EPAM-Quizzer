@@ -14,7 +14,7 @@ const config = {
   isProduction: process.env.NODE_ENV === 'production',
 
   // CORS
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  corsOrigin: process.env.CORS_ORIGIN || '*',
 
   // Logging
   logLevel: process.env.LOG_LEVEL || 'info',

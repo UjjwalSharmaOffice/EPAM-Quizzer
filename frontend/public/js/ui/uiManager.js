@@ -270,11 +270,87 @@ class UIManager {
   }
 
   /**
+   * Show loading overlay
+   */
+  showLoading(message = 'Loading...') {
+    // Check if overlay exists, if not create it
+    let overlay = document.getElementById('loadingOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'loadingOverlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      overlay.style.color = '#fff';
+      overlay.style.display = 'flex';
+      overlay.style.justifyContent = 'center';
+      overlay.style.alignItems = 'center';
+      overlay.style.zIndex = '9999';
+      overlay.style.fontSize = '1.5rem';
+      overlay.style.flexDirection = 'column';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `<div class="spinner" style="margin-bottom: 20px; font-size: 3rem;">⏳</div><div>${message}</div>`;
+    overlay.style.display = 'flex';
+  }
+
+  /**
+   * Hide loading overlay
+   */
+  hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+  }
+
+  /**
    * Get host name input
    */
   getHostNameInput() {
     const input = prompt('Enter your name:');
     return input ? input.trim() : null;
+  }
+
+  /**
+   * Get server URL from user or storage
+   * @param {boolean} forcePrompt - Force a prompt even if saved
+   */
+  getServerUrlInput(forcePrompt = false) {
+    if (!forcePrompt) {
+      const savedUrl = sessionStorage.getItem('quizzer_server_url');
+      if (savedUrl) {
+        return savedUrl;
+      }
+    }
+
+    let url = prompt('Connection failed. Please enter Server URL (e.g., https://your-ngrok-url.io):');
+    if (!url) {
+      return null;
+    }
+
+    // Remove trailing slash if present
+    url = url.replace(/\/$/, "");
+
+    sessionStorage.setItem('quizzer_server_url', url);
+    return url;
+  }
+
+  /**
+   * Change server URL and reload
+   */
+  changeServerUrl() {
+    // Prompt immediately
+    const url = prompt('Enter new Server URL (e.g., https://your-ngrok-url.io):');
+    if (url) {
+      // Save and reload
+      const cleanUrl = url.replace(/\/$/, "");
+      sessionStorage.setItem('quizzer_server_url', cleanUrl);
+      window.location.reload();
+    }
   }
 
   /**
