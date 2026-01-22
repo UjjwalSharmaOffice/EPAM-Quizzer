@@ -18,6 +18,13 @@ class UIManager {
     this.elements.hostScreen = document.getElementById('hostScreen');
     this.elements.participantScreen = document.getElementById('participantScreen');
 
+    // Modal elements
+    this.elements.nameTeamModal = document.getElementById('nameTeamModal');
+    this.elements.modalNameInput = document.getElementById('modalNameInput');
+    this.elements.modalTeamInput = document.getElementById('modalTeamInput');
+    this.elements.modalSubmitBtn = document.getElementById('modalSubmitBtn');
+    this.elements.modalCancelBtn = document.getElementById('modalCancelBtn');
+
     // Host elements
     this.elements.hostRoomId = document.getElementById('hostRoomId');
     this.elements.hostHostName = document.getElementById('hostHostName');
@@ -93,31 +100,111 @@ class UIManager {
       return;
     }
 
-    let html = '';
-    participants.forEach((p) => {
-      let statusBadge = 'waiting';
-      let statusText = 'Waiting';
+    // Group participants by team
+    const teams = {};
+    const noTeam = [];
 
-      if (p.rank) {
-        if (p.winner) {
-          statusBadge = 'winner';
-          statusText = `#${p.rank} Winner 🏆`;
-        } else {
-          statusBadge = 'buzzed';
-          statusText = `#${p.rank} Buzzed`;
+    participants.forEach((p) => {
+      // Extract team from name if in format "Name (Team)"
+      const teamMatch = p.name.match(/\(([^)]+)\)$/);
+      const teamName = teamMatch ? teamMatch[1] : null;
+
+      if (teamName) {
+        if (!teams[teamName]) {
+          teams[teamName] = [];
         }
-      } else if (p.buzzed) {
-        statusBadge = 'buzzed';
-        statusText = 'Buzzed';
+        teams[teamName].push(p);
+      } else {
+        noTeam.push(p);
       }
+    });
+
+    let html = '';
+
+    // Render teams
+    Object.keys(teams).sort().forEach((teamName) => {
+      html += `
+        <div class="team-section">
+          <div class="team-header">${teamName}</div>
+          <div class="team-members">
+      `;
+
+      teams[teamName].forEach((p) => {
+        let statusBadge = 'waiting';
+        let statusText = 'Waiting';
+
+        if (p.rank) {
+          if (p.winner) {
+            statusBadge = 'winner';
+            statusText = `#${p.rank} Winner`;
+          } else {
+            statusBadge = 'buzzed';
+            statusText = `#${p.rank} Buzzed`;
+          }
+        } else if (p.buzzed) {
+          statusBadge = 'buzzed';
+          statusText = 'Buzzed';
+        }
+
+        // Remove team name from display
+        const displayName = p.name.replace(/\s*\([^)]+\)$/, '');
+
+        html += `
+          <div class="participant-item">
+            <span class="participant-name">${displayName}</span>
+            <span class="participant-status ${statusBadge}">${statusText}</span>
+          </div>
+        `;
+      });
 
       html += `
-        <div class="participant-item">
-          <span class="participant-name">${p.name}</span>
-          <span class="participant-status ${statusBadge}">${statusText}</span>
+          </div>
         </div>
       `;
     });
+
+    // Render participants without teams
+    if (noTeam.length > 0) {
+      if (Object.keys(teams).length > 0) {
+        html += `
+          <div class="team-section">
+            <div class="team-header">Individual Participants</div>
+            <div class="team-members">
+        `;
+      }
+
+      noTeam.forEach((p) => {
+        let statusBadge = 'waiting';
+        let statusText = 'Waiting';
+
+        if (p.rank) {
+          if (p.winner) {
+            statusBadge = 'winner';
+            statusText = `#${p.rank} Winner`;
+          } else {
+            statusBadge = 'buzzed';
+            statusText = `#${p.rank} Buzzed`;
+          }
+        } else if (p.buzzed) {
+          statusBadge = 'buzzed';
+          statusText = 'Buzzed';
+        }
+
+        html += `
+          <div class="participant-item">
+            <span class="participant-name">${p.name}</span>
+            <span class="participant-status ${statusBadge}">${statusText}</span>
+          </div>
+        `;
+      });
+
+      if (Object.keys(teams).length > 0) {
+        html += `
+            </div>
+          </div>
+        `;
+      }
+    }
 
     this.elements.hostParticipantsList.innerHTML = html;
   }
@@ -134,7 +221,7 @@ class UIManager {
    */
   updateHostBuzzList(buzzes) {
     if (buzzes && buzzes.length > 0) {
-      let html = '<div class="winner-content"><div class="winner-emoji">📊</div><div class="winner-text">Buzzer Order</div></div><div class="buzz-list-container"><ol class="buzz-list">';
+      let html = '<div class="winner-content"><div class="winner-text">Buzzer Order</div></div><div class="buzz-list-container"><ol class="buzz-list">';
 
       buzzes.forEach((buzz, index) => {
         const isWinner = index === 0;
@@ -186,6 +273,15 @@ class UIManager {
     this.elements.participantBuzzBtn.textContent = 'BUZZ!';
     this.updateParticipantStatus(`Connected as: ${participantName}`);
     this.updateParticipantBuzzStatus(null);
+  }
+
+  /**
+   * Set participant name value
+   */
+  setParticipantNameValue(name) {
+    this.elements.participantNameInput.value = name;
+    this.elements.participantNameInput.readOnly = true;
+    this.elements.participantNameInput.style.opacity = '0.7';
   }
 
   /**
@@ -311,8 +407,72 @@ class UIManager {
    * Get host name input
    */
   getHostNameInput() {
-    const input = prompt('Enter your name:');
-    return input ? input.trim() : null;
+    return new Promise((resolve) => {
+      this.showNameTeamModal((name, team) => {
+        resolve({ name, team });
+      });
+    });
+  }
+
+  /**
+   * Show name and team modal
+   */
+  showNameTeamModal(callback) {
+    this.elements.modalNameInput.value = '';
+    this.elements.modalTeamInput.value = '';
+    this.elements.nameTeamModal.style.display = 'flex';
+    this.elements.modalNameInput.focus();
+
+    // Handle Enter key in inputs
+    const handleEnter = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.elements.modalSubmitBtn.click();
+      }
+    };
+
+    this.elements.modalNameInput.addEventListener('keypress', handleEnter);
+    this.elements.modalTeamInput.addEventListener('keypress', handleEnter);
+
+    // Submit handler
+    const submitHandler = () => {
+      const name = this.elements.modalNameInput.value.trim();
+      const team = this.elements.modalTeamInput.value.trim();
+
+      if (!name) {
+        alert('Please enter your name');
+        this.elements.modalNameInput.focus();
+        return;
+      }
+
+      this.hideNameTeamModal();
+      this.elements.modalNameInput.removeEventListener('keypress', handleEnter);
+      this.elements.modalTeamInput.removeEventListener('keypress', handleEnter);
+      this.elements.modalSubmitBtn.removeEventListener('click', submitHandler);
+      this.elements.modalCancelBtn.removeEventListener('click', cancelHandler);
+
+      callback(name, team);
+    };
+
+    // Cancel handler
+    const cancelHandler = () => {
+      this.hideNameTeamModal();
+      this.elements.modalNameInput.removeEventListener('keypress', handleEnter);
+      this.elements.modalTeamInput.removeEventListener('keypress', handleEnter);
+      this.elements.modalSubmitBtn.removeEventListener('click', submitHandler);
+      this.elements.modalCancelBtn.removeEventListener('click', cancelHandler);
+      callback(null, null);
+    };
+
+    this.elements.modalSubmitBtn.addEventListener('click', submitHandler);
+    this.elements.modalCancelBtn.addEventListener('click', cancelHandler);
+  }
+
+  /**
+   * Hide name and team modal
+   */
+  hideNameTeamModal() {
+    this.elements.nameTeamModal.style.display = 'none';
   }
 
   /**

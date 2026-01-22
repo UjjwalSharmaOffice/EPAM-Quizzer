@@ -39,11 +39,20 @@ class ThemeToggle {
     }
 
     createToggleButton() {
-        // Check if button already exists
+        // Check if button already exists in the page
+        const existingBtn = document.getElementById('themeToggle');
+        if (existingBtn) {
+            existingBtn.addEventListener('click', () => this.toggle());
+            this.updateButtonIcon(existingBtn);
+            return;
+        }
+
+        // Check if container already exists
         if (document.querySelector('.theme-toggle-container')) {
             const btn = document.querySelector('.theme-toggle-btn');
             if (btn) {
                 btn.addEventListener('click', () => this.toggle());
+                this.updateButtonIcon(btn);
             }
             return;
         }
@@ -55,31 +64,36 @@ class ThemeToggle {
         // Create button
         const button = document.createElement('button');
         button.className = 'theme-toggle-btn';
+        button.id = 'themeToggle';
         button.setAttribute('aria-label', 'Toggle theme');
         button.setAttribute('title', 'Toggle between light and dark theme');
-        this.updateButtonIcon(button);
-
+        
+        // Create icon spans
+        const lightIcon = document.createElement('span');
+        lightIcon.className = 'theme-icon-light';
+        lightIcon.textContent = 'Light';
+        
+        const darkIcon = document.createElement('span');
+        darkIcon.className = 'theme-icon-dark';
+        darkIcon.textContent = 'Dark';
+        
+        button.appendChild(lightIcon);
+        button.appendChild(darkIcon);
+        
         button.addEventListener('click', () => this.toggle());
 
-        // Create label
-        const label = document.createElement('span');
-        label.className = 'theme-label';
-        label.textContent = this.getCurrentTheme() === this.DARK_THEME ? 'Dark' : 'Light';
-
         container.appendChild(button);
-        container.appendChild(label);
         document.body.appendChild(container);
+        
+        this.updateButtonIcon(button);
     }
 
     updateButtonIcon(button) {
+        // Icons are controlled by CSS based on theme, no need to update content
+        // Just update aria-label for accessibility
         const currentTheme = this.getCurrentTheme();
-        button.textContent = currentTheme === this.DARK_THEME ? '☀️' : '🌙';
-        
-        // Update label if it exists
-        const label = document.querySelector('.theme-label');
-        if (label) {
-            label.textContent = currentTheme === this.DARK_THEME ? 'Light' : 'Dark';
-        }
+        const newLabel = currentTheme === this.DARK_THEME ? 'Switch to light mode' : 'Switch to dark mode';
+        button.setAttribute('aria-label', newLabel);
     }
 
     setTheme(theme, skipAnimation = false) {
