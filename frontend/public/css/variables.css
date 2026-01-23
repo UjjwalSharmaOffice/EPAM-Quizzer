@@ -1,25 +1,25 @@
 /* ==========================================
-   CSS VARIABLES - DESIGN SYSTEM (DUAL THEME)
+   CSS VARIABLES - MODERN DESIGN SYSTEM
    ========================================== */
 
 :root {
-    /* LIGHT THEME - Professional Corporate Colors */
+    /* LIGHT THEME - Modern Professional Colors */
     
-    /* Primary Colors - Muted Blue */
+    /* Primary Colors - Vibrant Blue */
     --primary-color: #2563eb;
     --primary-dark: #1d4ed8;
     --primary-light: #3b82f6;
     --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
     
-    /* Secondary Colors - Muted Teal */
-    --secondary-color: #0d9488;
-    --secondary-dark: #0f766e;
-    --secondary-light: #14b8a6;
-    --secondary-gradient: linear-gradient(135deg, #0d9488 0%, #115e59 100%);
+    /* Secondary Colors - Purple Accent */
+    --secondary-color: #7c3aed;
+    --secondary-dark: #6d28d9;
+    --secondary-light: #8b5cf6;
+    --secondary-gradient: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     
-    /* Accent Colors - Professional Slate */
-    --accent-color: #64748b;
-    --accent-gradient: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    /* Accent Colors - Teal */
+    --accent-color: #0ea5e9;
+    --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
     
     /* Neutral Colors - Light Theme */
     --white: #ffffff;
@@ -46,17 +46,17 @@
     --info-light: #cffafe;
     
     /* Backgrounds - Light Theme */
-    --bg-primary: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    --bg-primary: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
     --bg-secondary: #f1f5f9;
     --bg-light: #ffffff;
     --bg-dark: #0f172a;
     
-    /* Dark Theme - Toggle States */
+    /* Dark Theme Colors */
     --dark-primary-color: #60a5fa;
     --dark-primary-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
     
-    --dark-secondary-color: #2dd4bf;
-    --dark-secondary-gradient: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
+    --dark-secondary-color: #a78bfa;
+    --dark-secondary-gradient: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
     
     --dark-success: #4ade80;
     --dark-success-light: #1e3a1f;
@@ -85,19 +85,18 @@
     --dark-bg-light: #0f172a;
     --dark-bg-dark: #ffffff;
     
-    /* Typography */
-    --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    --font-family-mono: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    /* Typography - Modern & Professional */
+    --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    --font-family-mono: 'SF Mono', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
     
-    --font-size-xs: 12px;
-    --font-size-sm: 14px;
-    --font-size-base: 16px;
-    --font-size-lg: 18px;
-    --font-size-xl: 20px;
-    --font-size-2xl: 24px;
-    --font-size-3xl: 30px;
-    --font-size-4xl: 36px;
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    --font-size-3xl: 1.875rem;  /* 30px */
+    --font-size-4xl: 2.25rem;   /* 36px */
     --font-size-5xl: 48px;
     
     --font-weight-light: 300;

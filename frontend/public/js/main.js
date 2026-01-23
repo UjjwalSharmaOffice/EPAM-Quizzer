@@ -94,8 +94,12 @@ class App {
    */
   async selectHostRole() {
     try {
-      const hostName = this.uiManager.getHostNameInput();
-      if (!hostName) return;
+      const userData = await this.uiManager.getHostNameInput();
+      if (!userData || !userData.name) return;
+
+      const hostName = userData.team 
+        ? `${userData.name} (${userData.team})` 
+        : userData.name;
 
       const roomId = this.uiManager.getHostRoomIdInput();
 
@@ -147,14 +151,28 @@ class App {
    */
   async selectParticipantRole() {
     try {
+      // Get participant name and team first
+      const userData = await this.uiManager.getHostNameInput();
+      if (!userData || !userData.name) return;
+
+      const participantName = userData.team 
+        ? `${userData.name} (${userData.team})` 
+        : userData.name;
+
+      // Store for later use
+      this.participantData = {
+        name: participantName,
+        rawName: userData.name,
+        team: userData.team || ''
+      };
+
       await this.connectToServer();
 
       this.participantController = new ParticipantController(this.signalingClient);
 
       this.participantController.on('joinedRoom', (room) => {
         this.uiManager.showParticipantScreen();
-        const inputs = this.uiManager.getParticipantInputs();
-        this.uiManager.showParticipantBuzzer(inputs.name);
+        this.uiManager.showParticipantBuzzer(participantName);
         this.uiManager.updateParticipantStatus('Connected - waiting for round to start');
       });
 
@@ -185,7 +203,10 @@ class App {
         this.uiManager.showRoleScreen();
       });
 
+      // Show participant screen with join form
       this.uiManager.showParticipantScreen();
+      // Pre-fill the name field
+      this.uiManager.setParticipantNameValue(participantName);
     } catch (error) {
       this.uiManager.showError(error.message);
       console.error('[App] Error selecting participant role:', error);

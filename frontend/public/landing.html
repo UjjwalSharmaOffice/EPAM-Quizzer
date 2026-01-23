@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EPAM Quiz Buzzer - Enterprise Quiz Management Platform</title>
+    <title>EPAM Quiz Buzzer - Real-time Quiz Platform</title>
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="/css/reset.css">
@@ -20,161 +20,42 @@
         <div class="navbar-container">
             <div class="navbar-brand">
                 <div class="logo">
-                    <span class="logo-icon">⚡</span>
                     <span class="logo-text">EPAM Quiz Buzzer</span>
                 </div>
             </div>
-            <div class="navbar-links">
-                <a href="#features" class="nav-link">Features</a>
-                <a href="#how-it-works" class="nav-link">How It Works</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="/index.html" class="btn btn-primary btn-sm">Get Started</a>
+            <div class="navbar-actions">
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle-btn" id="themeToggle" aria-label="Toggle theme">
+                    <span class="theme-icon-light">Light</span>
+                    <span class="theme-icon-dark">Dark</span>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1 class="hero-title">Enterprise Quiz Management Platform</h1>
-                <p class="hero-subtitle">Real-time interactive quizzes with WebRTC technology for seamless corporate training and assessments</p>
-                <div class="hero-cta">
-                    <a href="/index.html" class="btn btn-primary btn-lg">Start Now</a>
-                    <a href="#features" class="btn btn-secondary btn-lg">Learn More</a>
-                </div>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">100%</span>
-                        <span class="stat-label">WebRTC Based</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">Real-time</span>
-                        <span class="stat-label">Synchronization</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">Secure</span>
-                        <span class="stat-label">Enterprise Grade</span>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="floating-card card-1">
-                    <div class="card-icon">👑</div>
-                    <div class="card-label">Host</div>
-                </div>
-                <div class="floating-card card-2">
-                    <div class="card-icon">🎯</div>
-                    <div class="card-label">Participant</div>
-                </div>
-                <div class="floating-card card-3">
-                    <div class="card-icon">⚡</div>
-                    <div class="card-label">Real-time</div>
+    <!-- Main Welcome Section -->
+    <main class="welcome-section">
+        <div class="welcome-container">
+            <!-- Glassmorphic Welcome Card -->
+            <div class="glass-card">
+                <div class="card-content">
+                    <h1 class="welcome-title">Welcome to Quiz Buzzer</h1>
+                    <p class="welcome-subtitle">Real-time interactive quizzes powered by WebRTC technology</p>
+                    <a href="/index.html" class="start-button">
+                        <span class="button-text">Get Started</span>
+                        <span class="button-icon">&rarr;</span>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="hero-background">
-            <div class="gradient-sphere sphere-1"></div>
-            <div class="gradient-sphere sphere-2"></div>
-            <div class="gradient-sphere sphere-3"></div>
-        </div>
-    </section>
 
-    <!-- Features Section -->
-    <section id="features" class="features">
-        <div class="section-header">
-            <h2 class="section-title">Key Features</h2>
-            <p class="section-subtitle">Everything you need for modern corporate training</p>
+        <!-- Animated Background Elements -->
+        <div class="background-gradient">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
         </div>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🎤</div>
-                <h3>Host Control</h3>
-                <p>Manage quizzes effortlessly with complete control over rooms, participants, and real-time results tracking</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Instant Buzzer</h3>
-                <p>Lightning-fast response times with precise timestamp tracking for fair competition</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🌐</div>
-                <h3>WebRTC Technology</h3>
-                <p>Peer-to-peer communication ensures low latency and high reliability for real-time interactions</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Live Analytics</h3>
-                <p>Track participant performance with real-time statistics and detailed response metrics</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔐</div>
-                <h3>Enterprise Security</h3>
-                <p>Secure room access with unique IDs and enterprise-grade encryption for sensitive data</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">📱</div>
-                <h3>Responsive Design</h3>
-                <p>Works seamlessly across desktop, tablet, and mobile devices for maximum accessibility</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section id="how-it-works" class="how-it-works">
-        <div class="section-header">
-            <h2 class="section-title">How It Works</h2>
-            <p class="section-subtitle">Simple steps to get your quiz running</p>
-        </div>
-
-        <div class="steps-container">
-            <div class="step-item">
-                <div class="step-number">1</div>
-                <h3>Host Creates Room</h3>
-                <p>The host initiates a new quiz room and receives a unique room ID to share with participants</p>
-                <div class="step-icon">👑</div>
-            </div>
-            <div class="step-connector"></div>
-            <div class="step-item">
-                <div class="step-number">2</div>
-                <h3>Participants Join</h3>
-                <p>Participants enter the room ID and their name to join the live quiz session</p>
-                <div class="step-icon">🎯</div>
-            </div>
-            <div class="step-connector"></div>
-            <div class="step-item">
-                <div class="step-number">3</div>
-                <h3>Ready to Buzz</h3>
-                <p>All participants wait for the host to start the round with their buzzer ready</p>
-                <div class="step-icon">⏰</div>
-            </div>
-            <div class="step-connector"></div>
-            <div class="step-item">
-                <div class="step-number">4</div>
-                <h3>First to Buzz Wins</h3>
-                <p>The host starts the round, and the first participant to buzz is announced as the winner</p>
-                <div class="step-icon">🏆</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="about-content">
-            <h2>About EPAM Quiz Buzzer</h2>
-            <p>Built with cutting-edge WebRTC technology, EPAM Quiz Buzzer is designed for enterprise training programs, corporate quizzes, and interactive learning sessions. Our platform ensures fair, real-time competition with millisecond-precision timing and secure room management.</p>
-            <p>Whether you're running a corporate training session, a knowledge competition, or an interactive team-building event, our platform provides the tools you need for success.</p>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-content">
-            <p>&copy; 2024 EPAM Quiz Buzzer. Enterprise Quiz Management Platform.</p>
-            <p class="footer-subtext">Built with WebRTC • Secure • Reliable • Professional</p>
-        </div>
-    </footer>
+    </main>
 
     <script src="/js/theme-toggle.js"></script>
     <script src="/js/landing.js"></script>
