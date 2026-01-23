@@ -26,12 +26,12 @@ const config = {
 
   // Room settings
   maxParticipantsPerRoom: 25,
-  roomIdleTimeout: 5 * 60 * 1000, // 5 minutes
+  roomIdleTimeout: 10 * 60 * 1000, // 10 minutes
   socketPingInterval: 30 * 1000, // 30 seconds
 
   // Validation
   minParticipantNameLength: 1,
-  maxParticipantNameLength: 20,
+  maxParticipantNameLength: 50,
 };
 
 Object.freeze(config);
