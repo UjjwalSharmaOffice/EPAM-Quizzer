@@ -6,6 +6,8 @@ class UIManager {
   constructor() {
     this.currentRole = null;
     this.elements = {};
+    this.storageNamespace = 'quizzer_user_cache_v1';
+    this.storageExpiryMs = 60 * 24 * 60 * 60 * 1000; // 60 days
     this.initializeElements();
   }
 
@@ -72,6 +74,17 @@ class UIManager {
     this.elements.joinSection.style.display = 'block';
     this.elements.buzzerSection.style.display = 'none';
     this.currentRole = 'participant';
+
+    // Prefill from saved participant data if available
+    const savedParticipant = this.getStoredValue('participant');
+    if (savedParticipant) {
+      if (savedParticipant.roomId) {
+        this.elements.participantRoomIdInput.value = savedParticipant.roomId;
+      }
+      if (savedParticipant.name) {
+        this.elements.participantNameInput.value = savedParticipant.name;
+      }
+    }
   }
 
   /**
@@ -514,7 +527,14 @@ class UIManager {
    */
   getHostNameInput() {
     return new Promise((resolve) => {
+      const saved = this.getStoredValue('user');
+      if (saved) {
+        this.elements.modalNameInput.value = saved.name || '';
+        this.elements.modalTeamInput.value = saved.team || '';
+      }
+
       this.showNameTeamModal((name, team) => {
+        this.setStoredValue('user', { name, team });
         resolve({ name, team });
       });
     });
@@ -524,8 +544,7 @@ class UIManager {
    * Show name and team modal
    */
   showNameTeamModal(callback) {
-    this.elements.modalNameInput.value = '';
-    this.elements.modalTeamInput.value = '';
+    // Keep any prefilled values (set before calling this method)
     this.elements.nameTeamModal.style.display = 'flex';
     this.elements.modalNameInput.focus();
 
@@ -626,8 +645,13 @@ class UIManager {
    * Get host room ID input
    */
   getHostRoomIdInput() {
-    const input = prompt('Enter custom Room ID (optional, leave blank for random):');
-    return input ? input.trim() : null;
+    const saved = this.getStoredValue('hostRoom');
+    const input = prompt('Enter custom Room ID (optional, leave blank for random):', saved?.roomId || '');
+    const roomId = input ? input.trim() : null;
+    if (roomId) {
+      this.setStoredValue('hostRoom', { roomId });
+    }
+    return roomId;
   }
 
   /**
@@ -637,7 +661,41 @@ class UIManager {
     const roomId = this.elements.participantRoomIdInput.value.trim();
     const name = this.elements.participantNameInput.value.trim();
 
+    // Persist for convenience
+    this.setStoredValue('participant', { roomId, name });
+
     return { roomId, name };
+  }
+
+  /**
+   * localStorage helpers with expiry
+   */
+  setStoredValue(key, value) {
+    try {
+      const payload = {
+        value,
+        expires: Date.now() + this.storageExpiryMs,
+      };
+      localStorage.setItem(this.storageNamespace + ':' + key, JSON.stringify(payload));
+    } catch (err) {
+      console.warn('Storage set failed', err);
+    }
+  }
+
+  getStoredValue(key) {
+    try {
+      const raw = localStorage.getItem(this.storageNamespace + ':' + key);
+      if (!raw) return null;
+      const payload = JSON.parse(raw);
+      if (!payload.expires || payload.expires < Date.now()) {
+        localStorage.removeItem(this.storageNamespace + ':' + key);
+        return null;
+      }
+      return payload.value;
+    } catch (err) {
+      console.warn('Storage get failed', err);
+      return null;
+    }
   }
 
   /**
