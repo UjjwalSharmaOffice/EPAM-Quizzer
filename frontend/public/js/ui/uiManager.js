@@ -41,6 +41,7 @@ class UIManager {
     this.elements.participantBuzzBtn = document.getElementById('participantBuzzBtn');
     this.elements.participantWinnerDisplay = document.getElementById('participantWinnerDisplay');
     this.elements.participantStatus = document.getElementById('participantStatus');
+    this.elements.participantTopThreeContainer = document.getElementById('participantTopThreeContainer');
     this.elements.joinSection = document.getElementById('joinSection');
     this.elements.buzzerSection = document.getElementById('buzzerSection');
   }
@@ -388,6 +389,51 @@ class UIManager {
       this.elements.participantWinnerDisplay.innerHTML = '<div>Waiting for host...</div>';
       this.elements.participantWinnerDisplay.classList.remove('active');
     }
+    
+    // Update top 3 participants display for participant view
+    if (data && data.buzzes) {
+      this.updateParticipantTopThreeList(data.buzzes);
+    }
+  }
+
+  /**
+   * Update top 3 participants display for participant view
+   */
+  updateParticipantTopThreeList(buzzes) {
+    if (!buzzes || buzzes.length === 0) {
+      this.elements.participantTopThreeContainer.innerHTML =
+        '<div class="empty-state"><div class="empty-state-text">Waiting for buzzes...</div></div>';
+      return;
+    }
+
+    // Get top 3 buzzes
+    const topThreeBuzzes = buzzes.slice(0, 3);
+
+    let html = '';
+
+    topThreeBuzzes.forEach((buzz, index) => {
+      // Extract team from name if in format "Name (Team)"
+      const teamMatch = buzz.name.match(/\(([^)]+)\)$/);
+      const teamName = teamMatch ? teamMatch[1] : 'No Team';
+      const displayName = buzz.name.replace(/\s*\([^)]+\)$/, '');
+
+      const medalEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+      const timeDiff = buzz.diff > 0 ? `+${(buzz.diff / 1000).toFixed(3)}s` : 'FIRST';
+
+      html += `
+        <div class="top-three-item rank-${index + 1}">
+          <div class="top-three-medal">${medalEmoji}</div>
+          <div class="top-three-info">
+            <div class="top-three-rank">Position ${index + 1}</div>
+            <div class="top-three-name">${displayName}</div>
+            <div class="top-three-team">${teamName}</div>
+            <div class="top-three-status">${timeDiff}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    this.elements.participantTopThreeContainer.innerHTML = html;
   }
 
   /**
