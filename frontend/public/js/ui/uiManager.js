@@ -355,12 +355,12 @@ class UIManager {
       if (myState.isWinner) {
         this.elements.participantWinnerDisplay.innerHTML = `
             <div class="winner-content">
-              <div class="winner-emoji">🎉</div>
+              <div class="winner-emoji">★</div>
               <div class="winner-text">YOU WON!</div>
               <div class="rank-text">Rank #1</div>
             </div>
           `;
-        this.elements.participantBuzzBtn.textContent = '✓ You Buzzed First!';
+        this.elements.participantBuzzBtn.textContent = 'You Buzzed First!';
       } else {
         this.elements.participantWinnerDisplay.innerHTML = `
             <div class="winner-content">
@@ -368,7 +368,7 @@ class UIManager {
               <div class="sub-text">Winner: ${data.winnerName}</div>
             </div>
           `;
-        this.elements.participantBuzzBtn.textContent = `✓ Buzzed (#${myState.rank})`;
+        this.elements.participantBuzzBtn.textContent = `Buzzed (#${myState.rank})`;
       }
       this.elements.participantWinnerDisplay.classList.add('active');
       this.elements.participantBuzzBtn.disabled = true;
@@ -443,9 +443,15 @@ class UIManager {
     this.elements.participantBuzzBtn.disabled = !enabled;
 
     if (locked) {
-      this.elements.participantBuzzBtn.textContent = '🔒 Locked';
+      if (!enabled) {
+        // Not enabled and locked - show "Waiting for round" message
+        this.elements.participantBuzzBtn.textContent = 'Waiting for Round';
+      } else {
+        // Enabled but locked - buzzer already used
+        this.elements.participantBuzzBtn.textContent = 'Locked';
+      }
     } else if (buzzed) {
-      this.elements.participantBuzzBtn.textContent = '✓ Buzzed';
+      this.elements.participantBuzzBtn.textContent = 'Buzzed';
     } else {
       this.elements.participantBuzzBtn.textContent = 'BUZZ!';
     }
@@ -489,7 +495,7 @@ class UIManager {
       overlay.style.flexDirection = 'column';
       document.body.appendChild(overlay);
     }
-    overlay.innerHTML = `<div class="spinner" style="margin-bottom: 20px; font-size: 3rem;">⏳</div><div>${message}</div>`;
+    overlay.innerHTML = `<div class="spinner" style="margin-bottom: 20px; font-size: 3rem;">...</div><div>${message}</div>`;
     overlay.style.display = 'flex';
   }
 

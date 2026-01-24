@@ -173,6 +173,8 @@ class App {
       this.participantController.on('joinedRoom', (room) => {
         this.uiManager.showParticipantScreen();
         this.uiManager.showParticipantBuzzer(participantName);
+        // Buzzer is disabled until round starts
+        this.uiManager.setParticipantBuzzButtonState(false, false, true);
         this.uiManager.updateParticipantStatus('Connected - waiting for round to start');
       });
 
