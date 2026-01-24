@@ -315,6 +315,17 @@ class UIManager {
   }
 
   /**
+   * Reset host round visuals (top 3 + buzz list)
+   */
+  resetHostRoundUI() {
+    this.elements.hostWinnerDisplay.innerHTML = '<div>Waiting for buzzer...</div>';
+    this.elements.hostWinnerDisplay.classList.remove('active');
+
+    this.elements.hostTopThreeList.innerHTML =
+      '<div class="empty-state"><div class="empty-state-text">No one has buzzed yet...</div></div>';
+  }
+
+  /**
    * Enable/disable host start button
    */
   setHostStartButtonEnabled(enabled) {

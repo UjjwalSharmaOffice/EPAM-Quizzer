@@ -134,6 +134,7 @@ class App {
       });
 
       this.hostController.on('roundStarted', () => {
+        this.uiManager.resetHostRoundUI();
         this.uiManager.updateHostStatus('Round active - waiting for buzz');
         this.uiManager.updateHostBuzzList(null);
         this.uiManager.updateHostParticipants(this.hostController.getRoomInfo().participants);
