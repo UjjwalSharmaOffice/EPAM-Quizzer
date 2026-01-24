@@ -126,7 +126,7 @@ class RoomManager {
 
     room.host = {
       id: hostData.id,
-      name: hostData.name,
+      name: this.normalizeTeamName(hostData.name),
       joinedAt: Date.now(),
     };
 
@@ -161,7 +161,7 @@ class RoomManager {
 
     room.participants.set(participantData.id, {
       id: participantData.id,
-      name: participantData.name,
+      name: this.normalizeTeamName(participantData.name),
       joinedAt: Date.now(),
       buzzed: false,
     });
@@ -311,6 +311,20 @@ class RoomManager {
   getParticipantUserIds(roomId) {
     const room = this.getRoom(roomId);
     return Array.from(room.participants.keys());
+  }
+
+  /**
+   * Normalize team name to uppercase if it's in format "Name (Team)"
+   */
+  normalizeTeamName(name) {
+    // Match pattern "Name (Team)" and convert Team to uppercase
+    const match = name.match(/^(.+?)\s*\((.+?)\)$/);
+    if (match) {
+      const namePart = match[1];
+      const teamPart = match[2];
+      return `${namePart} (${teamPart.toUpperCase()})`;
+    }
+    return name;
   }
 
   /**

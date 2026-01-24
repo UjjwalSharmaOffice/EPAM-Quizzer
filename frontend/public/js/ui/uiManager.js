@@ -445,13 +445,16 @@ class UIManager {
         return;
       }
 
+      // Convert team name to uppercase to avoid case-sensitivity issues
+      const normalizedTeam = team.toUpperCase();
+
       this.hideNameTeamModal();
       this.elements.modalNameInput.removeEventListener('keypress', handleEnter);
       this.elements.modalTeamInput.removeEventListener('keypress', handleEnter);
       this.elements.modalSubmitBtn.removeEventListener('click', submitHandler);
       this.elements.modalCancelBtn.removeEventListener('click', cancelHandler);
 
-      callback(name, team);
+      callback(name, normalizedTeam);
     };
 
     // Cancel handler
