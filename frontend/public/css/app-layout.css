@@ -303,6 +303,91 @@ body {
     gap: var(--space-3);
 }
 
+/* Top 3 Participants List */
+.top-three-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.top-three-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.top-three-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--background-secondary);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.top-three-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.top-three-item.rank-1 {
+    border-left-color: #FFD700;
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.top-three-item.rank-2 {
+    border-left-color: #C0C0C0;
+    background: rgba(192, 192, 192, 0.05);
+}
+
+.top-three-item.rank-3 {
+    border-left-color: #CD7F32;
+    background: rgba(205, 127, 50, 0.05);
+}
+
+.top-three-medal {
+    font-size: 2rem;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.top-three-info {
+    flex: 1;
+}
+
+.top-three-rank {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-1);
+}
+
+.top-three-name {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.top-three-team {
+    font-size: var(--font-size-sm);
+    color: var(--primary-color);
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-1) var(--space-2);
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    margin-bottom: var(--space-2);
+}
+
+.top-three-status {
+    font-size: var(--font-size-sm);
+    color: var(--success-color);
+    font-weight: var(--font-weight-bold);
+}
+
 /* Team Sections */
 .team-section {
     margin-bottom: var(--space-5);

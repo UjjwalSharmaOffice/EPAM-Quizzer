@@ -29,6 +29,7 @@ class UIManager {
     this.elements.hostRoomId = document.getElementById('hostRoomId');
     this.elements.hostHostName = document.getElementById('hostHostName');
     this.elements.hostStartBtn = document.getElementById('hostStartBtn');
+    this.elements.hostTopThreeList = document.getElementById('hostTopThreeList');
     this.elements.hostParticipantsList = document.getElementById('hostParticipantsList');
     this.elements.hostWinnerDisplay = document.getElementById('hostWinnerDisplay');
     this.elements.hostStatus = document.getElementById('hostStatus');
@@ -207,6 +208,59 @@ class UIManager {
     }
 
     this.elements.hostParticipantsList.innerHTML = html;
+    
+    // Update top 3 participants list
+    this.updateTopThreeParticipants(participants);
+  }
+
+  /**
+   * Update top 3 participants display
+   */
+  updateTopThreeParticipants(participants) {
+    if (participants.length === 0) {
+      this.elements.hostTopThreeList.innerHTML =
+        '<div class="empty-state"><div class="empty-state-text">Waiting for participants to join...</div></div>';
+      return;
+    }
+
+    // Sort by rank (buzzed participants have ranks, others don't)
+    const buzzedParticipants = participants
+      .filter(p => p.rank)
+      .sort((a, b) => a.rank - b.rank)
+      .slice(0, 3);
+
+    if (buzzedParticipants.length === 0) {
+      this.elements.hostTopThreeList.innerHTML =
+        '<div class="empty-state"><div class="empty-state-text">No one has buzzed yet...</div></div>';
+      return;
+    }
+
+    let html = '<div class="top-three-container">';
+
+    buzzedParticipants.forEach((p, index) => {
+      // Extract team from name if in format "Name (Team)"
+      const teamMatch = p.name.match(/\(([^)]+)\)$/);
+      const teamName = teamMatch ? teamMatch[1] : 'No Team';
+      const displayName = p.name.replace(/\s*\([^)]+\)$/, '');
+
+      const medalEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+      const statusText = p.winner ? 'WINNER' : `Rank #${p.rank}`;
+
+      html += `
+        <div class="top-three-item rank-${index + 1}">
+          <div class="top-three-medal">${medalEmoji}</div>
+          <div class="top-three-info">
+            <div class="top-three-rank">Position ${index + 1}</div>
+            <div class="top-three-name">${displayName}</div>
+            <div class="top-three-team">${teamName}</div>
+            <div class="top-three-status">${statusText}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    this.elements.hostTopThreeList.innerHTML = html;
   }
 
   /**
