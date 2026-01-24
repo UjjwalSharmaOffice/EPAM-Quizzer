@@ -25,8 +25,8 @@ const config = {
     .map((url) => ({ urls: [url.trim()] })),
 
   // Room settings
-  maxParticipantsPerRoom: 25,
-  roomIdleTimeout: 10 * 60 * 1000, // 10 minutes
+  maxParticipantsPerRoom: 50,
+  roomIdleTimeout: 60 * 60 * 1000, // 60 minutes
   socketPingInterval: 30 * 1000, // 30 seconds
 
   // Validation
