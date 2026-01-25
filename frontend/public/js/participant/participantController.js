@@ -12,6 +12,7 @@ class ParticipantController {
     this.hostId = null;
     this.hasLocalBuzzed = false;
     this.buzzerLocked = false;
+    this.roundStarted = false;
   }
 
   /**
@@ -64,6 +65,7 @@ class ParticipantController {
   handleRoundStart() {
     this.hasLocalBuzzed = false;
     this.buzzerLocked = false;
+    this.roundStarted = true;
 
     console.log('[ParticipantController] Round started');
     this.emit('roundStarted');
@@ -112,6 +114,11 @@ class ParticipantController {
    * Buzz!
    */
   async buzz() {
+    if (!this.roundStarted) {
+      console.log('[ParticipantController] Cannot buzz - round has not started');
+      return false;
+    }
+
     if (this.buzzerLocked || this.hasLocalBuzzed) {
       console.log('[ParticipantController] Cannot buzz');
       return false;
@@ -148,6 +155,7 @@ class ParticipantController {
       roomId: this.roomId,
       hasLocalBuzzed: this.hasLocalBuzzed,
       buzzerLocked: this.buzzerLocked,
+      roundStarted: this.roundStarted,
     };
   }
 

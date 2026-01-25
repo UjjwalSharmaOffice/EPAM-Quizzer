@@ -1,5 +1,5 @@
 import logger from '../utils/logger.js';
-import roomManager from '../managers/roomManager.js';
+import roomManager from '../rooms/roomManager.js';
 import { ValidationError, NotFoundError } from '../utils/errors.js';
 
 /**

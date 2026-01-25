@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import logger from '../utils/logger.js';
 import config from '../config/config.js';
+import roomManager from '../rooms/roomManager.js';
 
 /**
  * Express application setup
@@ -29,7 +30,7 @@ export function createApp() {
 
   // API Routes for debugging (optional)
   app.get('/api/rooms', (req, res) => {
-    const rooms = require('../managers/roomManager.js').default.getAllRooms();
+    const rooms = roomManager.getAllRooms();
     res.json({
       count: rooms.length,
       rooms: rooms.map((room) => room.getSummary()),

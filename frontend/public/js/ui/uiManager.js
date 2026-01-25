@@ -6,6 +6,8 @@ class UIManager {
   constructor() {
     this.currentRole = null;
     this.elements = {};
+    this.storageNamespace = 'quizzer_user_cache_v1';
+    this.storageExpiryMs = 60 * 24 * 60 * 60 * 1000; // 60 days
     this.initializeElements();
   }
 
@@ -29,6 +31,7 @@ class UIManager {
     this.elements.hostRoomId = document.getElementById('hostRoomId');
     this.elements.hostHostName = document.getElementById('hostHostName');
     this.elements.hostStartBtn = document.getElementById('hostStartBtn');
+    this.elements.hostTopThreeList = document.getElementById('hostTopThreeList');
     this.elements.hostParticipantsList = document.getElementById('hostParticipantsList');
     this.elements.hostWinnerDisplay = document.getElementById('hostWinnerDisplay');
     this.elements.hostStatus = document.getElementById('hostStatus');
@@ -40,6 +43,7 @@ class UIManager {
     this.elements.participantBuzzBtn = document.getElementById('participantBuzzBtn');
     this.elements.participantWinnerDisplay = document.getElementById('participantWinnerDisplay');
     this.elements.participantStatus = document.getElementById('participantStatus');
+    this.elements.participantTopThreeContainer = document.getElementById('participantTopThreeContainer');
     this.elements.joinSection = document.getElementById('joinSection');
     this.elements.buzzerSection = document.getElementById('buzzerSection');
   }
@@ -70,6 +74,17 @@ class UIManager {
     this.elements.joinSection.style.display = 'block';
     this.elements.buzzerSection.style.display = 'none';
     this.currentRole = 'participant';
+
+    // Prefill from saved participant data if available
+    const savedParticipant = this.getStoredValue('participant');
+    if (savedParticipant) {
+      if (savedParticipant.roomId) {
+        this.elements.participantRoomIdInput.value = savedParticipant.roomId;
+      }
+      if (savedParticipant.name) {
+        this.elements.participantNameInput.value = savedParticipant.name;
+      }
+    }
   }
 
   /**
@@ -207,6 +222,59 @@ class UIManager {
     }
 
     this.elements.hostParticipantsList.innerHTML = html;
+    
+    // Update top 3 participants list
+    this.updateTopThreeParticipants(participants);
+  }
+
+  /**
+   * Update top 3 participants display
+   */
+  updateTopThreeParticipants(participants) {
+    if (participants.length === 0) {
+      this.elements.hostTopThreeList.innerHTML =
+        '<div class="empty-state"><div class="empty-state-text">Waiting for participants to join...</div></div>';
+      return;
+    }
+
+    // Sort by rank (buzzed participants have ranks, others don't)
+    const buzzedParticipants = participants
+      .filter(p => p.rank)
+      .sort((a, b) => a.rank - b.rank)
+      .slice(0, 3);
+
+    if (buzzedParticipants.length === 0) {
+      this.elements.hostTopThreeList.innerHTML =
+        '<div class="empty-state"><div class="empty-state-text">No one has buzzed yet...</div></div>';
+      return;
+    }
+
+    let html = '<div class="top-three-container">';
+
+    buzzedParticipants.forEach((p, index) => {
+      // Extract team from name if in format "Name (Team)"
+      const teamMatch = p.name.match(/\(([^)]+)\)$/);
+      const teamName = teamMatch ? teamMatch[1] : 'No Team';
+      const displayName = p.name.replace(/\s*\([^)]+\)$/, '');
+
+      const medalEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+      const statusText = p.winner ? 'WINNER' : `Rank #${p.rank}`;
+
+      html += `
+        <div class="top-three-item rank-${index + 1}">
+          <div class="top-three-medal">${medalEmoji}</div>
+          <div class="top-three-info">
+            <div class="top-three-rank">Position ${index + 1}</div>
+            <div class="top-three-name">${displayName}</div>
+            <div class="top-three-team">${teamName}</div>
+            <div class="top-three-status">${statusText}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    this.elements.hostTopThreeList.innerHTML = html;
   }
 
   /**
@@ -244,6 +312,17 @@ class UIManager {
       this.elements.hostWinnerDisplay.innerHTML = '<div>Waiting for buzzer...</div>';
       this.elements.hostWinnerDisplay.classList.remove('active');
     }
+  }
+
+  /**
+   * Reset host round visuals (top 3 + buzz list)
+   */
+  resetHostRoundUI() {
+    this.elements.hostWinnerDisplay.innerHTML = '<div>Waiting for buzzer...</div>';
+    this.elements.hostWinnerDisplay.classList.remove('active');
+
+    this.elements.hostTopThreeList.innerHTML =
+      '<div class="empty-state"><div class="empty-state-text">No one has buzzed yet...</div></div>';
   }
 
   /**
@@ -300,12 +379,12 @@ class UIManager {
       if (myState.isWinner) {
         this.elements.participantWinnerDisplay.innerHTML = `
             <div class="winner-content">
-              <div class="winner-emoji">🎉</div>
+              <div class="winner-emoji">★</div>
               <div class="winner-text">YOU WON!</div>
               <div class="rank-text">Rank #1</div>
             </div>
           `;
-        this.elements.participantBuzzBtn.textContent = '✓ You Buzzed First!';
+        this.elements.participantBuzzBtn.textContent = 'You Buzzed First!';
       } else {
         this.elements.participantWinnerDisplay.innerHTML = `
             <div class="winner-content">
@@ -313,7 +392,7 @@ class UIManager {
               <div class="sub-text">Winner: ${data.winnerName}</div>
             </div>
           `;
-        this.elements.participantBuzzBtn.textContent = `✓ Buzzed (#${myState.rank})`;
+        this.elements.participantBuzzBtn.textContent = `Buzzed (#${myState.rank})`;
       }
       this.elements.participantWinnerDisplay.classList.add('active');
       this.elements.participantBuzzBtn.disabled = true;
@@ -334,6 +413,51 @@ class UIManager {
       this.elements.participantWinnerDisplay.innerHTML = '<div>Waiting for host...</div>';
       this.elements.participantWinnerDisplay.classList.remove('active');
     }
+    
+    // Update top 3 participants display for participant view
+    if (data && data.buzzes) {
+      this.updateParticipantTopThreeList(data.buzzes);
+    }
+  }
+
+  /**
+   * Update top 3 participants display for participant view
+   */
+  updateParticipantTopThreeList(buzzes) {
+    if (!buzzes || buzzes.length === 0) {
+      this.elements.participantTopThreeContainer.innerHTML =
+        '<div class="empty-state"><div class="empty-state-text">Waiting for buzzes...</div></div>';
+      return;
+    }
+
+    // Get top 3 buzzes
+    const topThreeBuzzes = buzzes.slice(0, 3);
+
+    let html = '';
+
+    topThreeBuzzes.forEach((buzz, index) => {
+      // Extract team from name if in format "Name (Team)"
+      const teamMatch = buzz.name.match(/\(([^)]+)\)$/);
+      const teamName = teamMatch ? teamMatch[1] : 'No Team';
+      const displayName = buzz.name.replace(/\s*\([^)]+\)$/, '');
+
+      const medalEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+      const timeDiff = buzz.diff > 0 ? `+${(buzz.diff / 1000).toFixed(3)}s` : 'FIRST';
+
+      html += `
+        <div class="top-three-item rank-${index + 1}">
+          <div class="top-three-medal">${medalEmoji}</div>
+          <div class="top-three-info">
+            <div class="top-three-rank">Position ${index + 1}</div>
+            <div class="top-three-name">${displayName}</div>
+            <div class="top-three-team">${teamName}</div>
+            <div class="top-three-status">${timeDiff}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    this.elements.participantTopThreeContainer.innerHTML = html;
   }
 
   /**
@@ -343,9 +467,15 @@ class UIManager {
     this.elements.participantBuzzBtn.disabled = !enabled;
 
     if (locked) {
-      this.elements.participantBuzzBtn.textContent = '🔒 Locked';
+      if (!enabled) {
+        // Not enabled and locked - show "Waiting for round" message
+        this.elements.participantBuzzBtn.textContent = 'Waiting for Round';
+      } else {
+        // Enabled but locked - buzzer already used
+        this.elements.participantBuzzBtn.textContent = 'Locked';
+      }
     } else if (buzzed) {
-      this.elements.participantBuzzBtn.textContent = '✓ Buzzed';
+      this.elements.participantBuzzBtn.textContent = 'Buzzed';
     } else {
       this.elements.participantBuzzBtn.textContent = 'BUZZ!';
     }
@@ -389,7 +519,7 @@ class UIManager {
       overlay.style.flexDirection = 'column';
       document.body.appendChild(overlay);
     }
-    overlay.innerHTML = `<div class="spinner" style="margin-bottom: 20px; font-size: 3rem;">⏳</div><div>${message}</div>`;
+    overlay.innerHTML = `<div class="spinner" style="margin-bottom: 20px; font-size: 3rem;">...</div><div>${message}</div>`;
     overlay.style.display = 'flex';
   }
 
@@ -408,7 +538,14 @@ class UIManager {
    */
   getHostNameInput() {
     return new Promise((resolve) => {
+      const saved = this.getStoredValue('user');
+      if (saved) {
+        this.elements.modalNameInput.value = saved.name || '';
+        this.elements.modalTeamInput.value = saved.team || '';
+      }
+
       this.showNameTeamModal((name, team) => {
+        this.setStoredValue('user', { name, team });
         resolve({ name, team });
       });
     });
@@ -418,8 +555,7 @@ class UIManager {
    * Show name and team modal
    */
   showNameTeamModal(callback) {
-    this.elements.modalNameInput.value = '';
-    this.elements.modalTeamInput.value = '';
+    // Keep any prefilled values (set before calling this method)
     this.elements.nameTeamModal.style.display = 'flex';
     this.elements.modalNameInput.focus();
 
@@ -445,13 +581,16 @@ class UIManager {
         return;
       }
 
+      // Convert team name to uppercase to avoid case-sensitivity issues
+      const normalizedTeam = team.toUpperCase();
+
       this.hideNameTeamModal();
       this.elements.modalNameInput.removeEventListener('keypress', handleEnter);
       this.elements.modalTeamInput.removeEventListener('keypress', handleEnter);
       this.elements.modalSubmitBtn.removeEventListener('click', submitHandler);
       this.elements.modalCancelBtn.removeEventListener('click', cancelHandler);
 
-      callback(name, team);
+      callback(name, normalizedTeam);
     };
 
     // Cancel handler
@@ -517,8 +656,13 @@ class UIManager {
    * Get host room ID input
    */
   getHostRoomIdInput() {
-    const input = prompt('Enter custom Room ID (optional, leave blank for random):');
-    return input ? input.trim() : null;
+    const saved = this.getStoredValue('hostRoom');
+    const input = prompt('Enter custom Room ID (optional, leave blank for random):', saved?.roomId || '');
+    const roomId = input ? input.trim() : null;
+    if (roomId) {
+      this.setStoredValue('hostRoom', { roomId });
+    }
+    return roomId;
   }
 
   /**
@@ -528,7 +672,41 @@ class UIManager {
     const roomId = this.elements.participantRoomIdInput.value.trim();
     const name = this.elements.participantNameInput.value.trim();
 
+    // Persist for convenience
+    this.setStoredValue('participant', { roomId, name });
+
     return { roomId, name };
+  }
+
+  /**
+   * localStorage helpers with expiry
+   */
+  setStoredValue(key, value) {
+    try {
+      const payload = {
+        value,
+        expires: Date.now() + this.storageExpiryMs,
+      };
+      localStorage.setItem(this.storageNamespace + ':' + key, JSON.stringify(payload));
+    } catch (err) {
+      console.warn('Storage set failed', err);
+    }
+  }
+
+  getStoredValue(key) {
+    try {
+      const raw = localStorage.getItem(this.storageNamespace + ':' + key);
+      if (!raw) return null;
+      const payload = JSON.parse(raw);
+      if (!payload.expires || payload.expires < Date.now()) {
+        localStorage.removeItem(this.storageNamespace + ':' + key);
+        return null;
+      }
+      return payload.value;
+    } catch (err) {
+      console.warn('Storage get failed', err);
+      return null;
+    }
   }
 
   /**
