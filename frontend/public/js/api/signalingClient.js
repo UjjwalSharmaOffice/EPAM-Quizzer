@@ -3,7 +3,7 @@
  * Handles all server communication
  */
 class SignalingClient {
-  constructor(serverUrl = "https://epam-quizzer-backend.onrender.com") {
+  constructor(serverUrl = "https://p01--backend--95bmd4c7jzbm.code.run") {
     this.serverUrl = serverUrl;
     this.socket = null;
     this.listeners = new Map();
