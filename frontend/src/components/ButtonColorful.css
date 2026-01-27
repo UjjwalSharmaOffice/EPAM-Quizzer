@@ -1,0 +1,79 @@
+.button-colorful {
+  position: relative;
+  min-height: 100px;
+  padding: 24px 32px;
+  overflow: hidden;
+  background: #18181b;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+[data-theme="dark"] .button-colorful {
+  background: #f4f4f5;
+}
+
+.button-colorful-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  opacity: 0.4;
+  filter: blur(8px);
+  transition: opacity 0.5s ease;
+}
+
+.button-colorful:hover .button-colorful-gradient {
+  opacity: 0.8;
+}
+
+.button-colorful-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.button-colorful-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+[data-theme="dark"] .button-colorful-title {
+  color: #18181b;
+}
+
+.button-colorful-icon {
+  transition: transform 0.3s ease;
+}
+
+.button-colorful:hover .button-colorful-icon {
+  transform: translate(4px, -4px);
+}
+
+.button-colorful-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .button-colorful-subtitle {
+  color: rgba(24, 24, 27, 0.8);
+}
+
+.button-colorful:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
+}
+
+.button-colorful:active {
+  transform: translateY(0);
+}

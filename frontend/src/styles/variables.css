@@ -1,0 +1,201 @@
+/* ==========================================
+   CSS VARIABLES - MODERN DESIGN SYSTEM
+   ========================================== */
+
+:root {
+    /* LIGHT THEME - Modern Professional Colors */
+    
+    /* Primary Colors - Vibrant Blue */
+    --primary-color: #6366f1;
+    --primary-dark: #4f46e5;
+    --primary-light: #818cf8;
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    
+    /* Secondary Colors - Purple Accent */
+    --secondary-color: #ec4899;
+    --secondary-dark: #db2777;
+    --secondary-light: #f472b6;
+    --secondary-gradient: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+    
+    /* Accent Colors - Teal */
+    --accent-color: #0ea5e9;
+    --accent-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    
+    /* Neutral Colors - Light Theme */
+    --white: #ffffff;
+    --black: #000000;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    
+    /* Semantic Colors - Light Theme */
+    --success: #16a34a;
+    --success-light: #dcfce7;
+    --error: #dc2626;
+    --error-light: #fee2e2;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --info: #0284c7;
+    --info-light: #cffafe;
+    
+    /* Backgrounds - Light Theme */
+    --bg-primary: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    --bg-secondary: #f1f5f9;
+    --bg-light: #ffffff;
+    --bg-dark: #0f172a;
+    
+    /* Dark Theme Colors */
+    --dark-primary-color: #60a5fa;
+    --dark-primary-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    
+    --dark-secondary-color: #a78bfa;
+    --dark-secondary-gradient: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    
+    --dark-success: #4ade80;
+    --dark-success-light: #1e3a1f;
+    --dark-error: #f87171;
+    --dark-error-light: #3f2016;
+    --dark-warning: #fbbf24;
+    --dark-warning-light: #362e1b;
+    --dark-info: #38bdf8;
+    --dark-info-light: #0f2847;
+    
+    --dark-white: #ffffff;
+    --dark-black: #000000;
+    --dark-gray-50: #0f172a;
+    --dark-gray-100: #1e293b;
+    --dark-gray-200: #334155;
+    --dark-gray-300: #475569;
+    --dark-gray-400: #64748b;
+    --dark-gray-500: #94a3b8;
+    --dark-gray-600: #cbd5e1;
+    --dark-gray-700: #e2e8f0;
+    --dark-gray-800: #f1f5f9;
+    --dark-gray-900: #f8fafc;
+    
+    --dark-bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --dark-bg-secondary: #1e293b;
+    --dark-bg-light: #0f172a;
+    --dark-bg-dark: #ffffff;
+    
+    /* Typography - Modern & Professional */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    --font-family-mono: 'SF Mono', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    
+    --font-size-xs: 0.75rem;    /* 12px */
+    --font-size-sm: 0.875rem;   /* 14px */
+    --font-size-base: 1rem;     /* 16px */
+    --font-size-lg: 1.125rem;   /* 18px */
+    --font-size-xl: 1.25rem;    /* 20px */
+    --font-size-2xl: 1.5rem;    /* 24px */
+    --font-size-3xl: 1.875rem;  /* 30px */
+    --font-size-4xl: 2.25rem;   /* 36px */
+    --font-size-5xl: 48px;
+    
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
+    
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --space-20: 80px;
+    --space-24: 96px;
+    
+    /* Border Radius */
+    --radius-none: 0;
+    --radius-sm: 4px;
+    --radius-base: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+    
+    /* Box Shadow */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    
+    /* Transitions */
+    --transition-fast: 150ms ease-in-out;
+    --transition-base: 300ms ease-in-out;
+    --transition-slow: 500ms ease-in-out;
+    
+    /* Z-Index */
+    --z-dropdown: 100;
+    --z-modal: 1000;
+    --z-popover: 1100;
+    --z-tooltip: 1200;
+    --z-notification: 1300;
+}
+
+/* DARK THEME - Apply when data-theme="dark" */
+[data-theme="dark"] {
+    /* Primary Colors - Dark Theme */
+    --primary-color: #60a5fa;
+    --primary-dark: #3b82f6;
+    --primary-light: #93c5fd;
+    --primary-gradient: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    
+    /* Secondary Colors - Dark Theme */
+    --secondary-color: #2dd4bf;
+    --secondary-dark: #0d9488;
+    --secondary-light: #5eead4;
+    --secondary-gradient: linear-gradient(135deg, #2dd4bf 0%, #0d9488 100%);
+    
+    /* Accent Colors - Dark Theme */
+    --accent-color: #94a3b8;
+    --accent-gradient: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    
+    /* Neutral Colors - Dark Theme */
+    --white: #0f172a;
+    --black: #f8fafc;
+    --gray-50: #0f172a;
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-300: #475569;
+    --gray-400: #64748b;
+    --gray-500: #94a3b8;
+    --gray-600: #cbd5e1;
+    --gray-700: #e2e8f0;
+    --gray-800: #f1f5f9;
+    --gray-900: #f8fafc;
+    
+    /* Semantic Colors - Dark Theme */
+    --success: #4ade80;
+    --success-light: #1e3a1f;
+    --error: #f87171;
+    --error-light: #3f2016;
+    --warning: #fbbf24;
+    --warning-light: #362e1b;
+    --info: #38bdf8;
+    --info-light: #0f2847;
+    
+    /* Backgrounds - Dark Theme */
+    --bg-primary: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --bg-secondary: #1e293b;
+    --bg-light: #0f172a;
+    --bg-dark: #f8fafc;
+}
