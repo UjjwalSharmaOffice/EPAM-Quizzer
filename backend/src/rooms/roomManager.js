@@ -99,7 +99,13 @@ class RoomManager {
     const timestamp = Date.now();
     participant.buzzed = true;
     const diff = room.buzzes.length === 0 ? 0 : timestamp - room.buzzes[0].timestamp;
-    room.buzzes.push({ participantId, name: participant.name, timestamp, diff });
+    room.buzzes.push({ 
+      participantId, 
+      participantName: participant.name,
+      name: participant.name, // Keep for backward compatibility
+      timestamp, 
+      diff 
+    });
 
     const first = room.buzzes[0].timestamp;
     room.buzzes.forEach((b) => { b.diff = b.timestamp - first; });

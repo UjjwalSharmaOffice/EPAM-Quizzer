@@ -30,6 +30,18 @@ class BuzzerServer {
       socket.on('buzzer:buzz', (data, callback) =>
         this.handleBuzz(socket, data, callback)
       );
+      socket.on('buzzer:markCorrect', (data, callback) =>
+        this.handleMarkCorrect(socket, data, callback)
+      );
+      socket.on('leaderboard:request', (data, callback) =>
+        this.handleLeaderboardRequest(socket, data, callback)
+      );
+      socket.on('team:addPoint', (data, callback) =>
+        this.handleTeamAddPoint(socket, data, callback)
+      );
+      socket.on('team:removePoint', (data, callback) =>
+        this.handleTeamRemovePoint(socket, data, callback)
+      );
       socket.on('disconnect', () => this.handleDisconnect(socket));
     });
   }
@@ -97,6 +109,12 @@ class BuzzerServer {
         participantId: socket.id,
         participantName: data.name,
         room: room.getSummary(),
+      });
+
+      // Broadcast updated leaderboard to show new team
+      this.io.to(`room:${data.roomId}`).emit('leaderboard:updated', {
+        teams: room.getTeamScores(),
+        roomId: data.roomId
       });
 
       callback({ success: true, room: room.getSummary() });
@@ -198,6 +216,190 @@ class BuzzerServer {
         socketId: socket.id,
       });
       callback({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * Host marks a participant's answer as correct
+   * Awards a point to the participant's team
+   */
+  handleMarkCorrect(socket, data, callback) {
+    try {
+      this.validateHostData(socket, data);
+      this.validateData(data, ['participantId']);
+
+      const roomId = socket.data.room;
+      const room = roomManager.getRoom(roomId);
+      
+      if (!room) {
+        throw new NotFoundError('Room');
+      }
+
+      const participant = room.participants.get(data.participantId);
+      if (!participant) {
+        throw new NotFoundError('Participant');
+      }
+
+      const result = room.addPointToTeam(participant.name);
+      
+      if (result) {
+        logger.info('BuzzerServer', 'Point awarded to team', {
+          roomId,
+          participantId: data.participantId,
+          participantName: participant.name,
+          teamName: result.teamName,
+          newScore: result.newScore
+        });
+
+        // Broadcast updated leaderboard to all clients in room
+        this.io.to(`room:${roomId}`).emit('leaderboard:updated', {
+          teams: room.getTeamScores(),
+          roomId: roomId
+        });
+
+        callback({ success: true, teams: room.getTeamScores() });
+      } else {
+        callback({ success: false, error: 'Participant has no team' });
+      }
+    } catch (error) {
+      logger.error('BuzzerServer', 'Error marking correct', {
+        error: error.message,
+        socketId: socket.id,
+      });
+      callback({ success: false, error: error.message });
+    }
+  }
+
+  /**
+   * Handle leaderboard data request
+   */
+  handleLeaderboardRequest(socket, data, callback) {
+    try {
+      this.validateData(data, ['roomId']);
+      
+      const room = roomManager.getRoom(data.roomId);
+      
+      if (!room) {
+        throw new NotFoundError('Room');
+      }
+
+      // Join the room to receive updates
+      socket.join(`room:${data.roomId}`);
+
+      const teams = room.getTeamScores();
+      logger.info('BuzzerServer', 'Leaderboard data requested', {
+        socketId: socket.id,
+        roomId: data.roomId,
+        teamsCount: teams.length,
+        teams: teams
+      });
+
+      // Send current leaderboard data
+      socket.emit('leaderboard:updated', {
+        teams: teams,
+        roomId: data.roomId
+      });
+
+      if (callback) {
+        callback({ success: true, teams: teams });
+      }
+    } catch (error) {
+      logger.error('BuzzerServer', 'Error fetching leaderboard', {
+        error: error.message,
+        socketId: socket.id,
+      });
+      if (callback) {
+        callback({ success: false, error: error.message });
+      }
+    }
+  }
+
+  /**
+   * Handle manual team point addition
+   */
+  handleTeamAddPoint(socket, data, callback) {
+    try {
+      this.validateData(data, ['roomId', 'teamName']);
+      
+      const room = roomManager.getRoom(data.roomId);
+      
+      if (!room) {
+        throw new NotFoundError('Room');
+      }
+
+      // Get current score or initialize
+      const currentScore = room.teamScores.get(data.teamName) || 0;
+      room.teamScores.set(data.teamName, currentScore + 1);
+      room.touch();
+
+      logger.info('BuzzerServer', 'Point manually added to team', {
+        roomId: data.roomId,
+        teamName: data.teamName,
+        newScore: currentScore + 1
+      });
+
+      // Broadcast updated leaderboard to all clients in room
+      this.io.to(`room:${data.roomId}`).emit('leaderboard:updated', {
+        teams: room.getTeamScores(),
+        roomId: data.roomId
+      });
+
+      if (callback) {
+        callback({ success: true, teams: room.getTeamScores() });
+      }
+    } catch (error) {
+      logger.error('BuzzerServer', 'Error adding team point', {
+        error: error.message,
+        socketId: socket.id,
+      });
+      if (callback) {
+        callback({ success: false, error: error.message });
+      }
+    }
+  }
+
+  /**
+   * Handle manual team point removal
+   */
+  handleTeamRemovePoint(socket, data, callback) {
+    try {
+      this.validateData(data, ['roomId', 'teamName']);
+      
+      const room = roomManager.getRoom(data.roomId);
+      
+      if (!room) {
+        throw new NotFoundError('Room');
+      }
+
+      // Get current score or initialize
+      const currentScore = room.teamScores.get(data.teamName) || 0;
+      const newScore = Math.max(0, currentScore - 1);
+      room.teamScores.set(data.teamName, newScore);
+      room.touch();
+
+      logger.info('BuzzerServer', 'Point manually removed from team', {
+        roomId: data.roomId,
+        teamName: data.teamName,
+        newScore: newScore
+      });
+
+      // Broadcast updated leaderboard to all clients in room
+      this.io.to(`room:${data.roomId}`).emit('leaderboard:updated', {
+        teams: room.getTeamScores(),
+        roomId: data.roomId
+      });
+
+      if (callback) {
+        callback({ success: true, teams: room.getTeamScores() });
+      }
+    } catch (error) {
+      logger.error('BuzzerServer', 'Error removing team point', {
+        error: error.message,
+        socketId: socket.id,
+      });
+      if (callback) {
+        callback({ success: false, error: error.message });
+      }
     }
   }
 
