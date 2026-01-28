@@ -26,7 +26,7 @@ const AppPage = () => {
       window.location.hostname === "127.0.0.1"
         ? "http://localhost:3000"
         : window.location.origin;
-    const initialUrl = sessionUrl || "https://a6c831ac5ff279.lhr.life" || defaultUrl;
+    const initialUrl = sessionUrl || defaultUrl;
     return new SignalingClient(initialUrl);
   });
 
@@ -144,6 +144,16 @@ const AppPage = () => {
     }
   };
 
+  const handleMarkCorrect = async (participantId) => {
+    try {
+      setError(null);
+      await signalingClient.emit('buzzer:markCorrect', { participantId });
+      console.log('[AppPage] Marked answer as correct for participant:', participantId);
+    } catch (err) {
+      setError(err.message || 'Failed to mark answer as correct');
+    }
+  };
+
   const handleParticipantBuzz = async () => {
     try {
       setError(null);
@@ -208,6 +218,7 @@ const AppPage = () => {
               participants={hostHook.participants}
               buzzes={hostHook.buzzes}
               onStartRound={handleHostStartRound}
+              onMarkCorrect={handleMarkCorrect}
               isRoundActive={hostHook.isRoundActive}
             />
           )}

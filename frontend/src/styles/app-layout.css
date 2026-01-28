@@ -1004,39 +1004,28 @@ body {
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.15);
 }
 
-.buzz-item.rank-1 {
-    background-image: 
-        linear-gradient(rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.15)),
-        linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(255, 193, 7, 0.5));
-}
-
-.buzz-item.rank-2 {
-    background-image: 
-        linear-gradient(rgba(192, 192, 192, 0.15), rgba(192, 192, 192, 0.15)),
-        linear-gradient(135deg, rgba(192, 192, 192, 0.5), rgba(169, 169, 169, 0.5));
-}
-
-.buzz-item.rank-3 {
-    background-image: 
-        linear-gradient(rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.15)),
-        linear-gradient(135deg, rgba(205, 127, 50, 0.5), rgba(184, 115, 51, 0.5));
-}
-
-.buzz-rank {
+.buzz-rank-number {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
     min-width: 60px;
     text-align: center;
+    flex-shrink: 0;
+    color: var(--color-primary);
 }
 
 .buzz-info {
     flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    min-width: 150px;
 }
 
-.buzz-rank {
+.buzz-name {
     font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.buzz-time {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
 }

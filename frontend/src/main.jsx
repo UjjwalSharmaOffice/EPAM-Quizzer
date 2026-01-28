@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
 import AppPage from './pages/AppPage';
+import Leaderboard from './pages/Leaderboard';
 import './styles/reset.css';
 import './styles/variables.css';
 import './styles/typography.css';
@@ -17,6 +18,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/app" element={<AppPage />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </BrowserRouter>
   );

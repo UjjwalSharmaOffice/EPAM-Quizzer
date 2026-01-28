@@ -1,9 +1,9 @@
 import React from 'react';
 import { ButtonColorful } from './ButtonColorful';
-import { Play } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 
-const HostView = ({ roomId, hostName, status, participants, buzzes, onStartRound, isRoundActive }) => {
-  const topThree = buzzes.slice(0, 3);
+const HostView = ({ roomId, hostName, status, participants, buzzes, onStartRound, isRoundActive, onMarkCorrect }) => {
+  const allBuzzes = buzzes; // Show all buzzers, not just top 3
   
   // Group participants by team
   const participantsByTeam = participants.reduce((acc, participant) => {
@@ -17,6 +17,11 @@ const HostView = ({ roomId, hostName, status, participants, buzzes, onStartRound
     acc[teamName].push(participant);
     return acc;
   }, {});
+  
+  const openLeaderboard = () => {
+    const leaderboardUrl = `/leaderboard?roomId=${roomId}`;
+    window.open(leaderboardUrl, '_blank', 'width=1280,height=720');
+  };
   
   return (
     <div id="hostScreen">
@@ -43,41 +48,70 @@ const HostView = ({ roomId, hostName, status, participants, buzzes, onStartRound
             </div>
           </div>
 
-          {/* Start Button */}
-          <div style={{ marginBottom: 'var(--space-8)' }}>
-            <ButtonColorful 
-              onClick={onStartRound}
-              label="Start Round"
-              subtitle="Begin quiz buzzer round"
-              className="start-round-button"
-            />
+          {/* Start Button and Leaderboard Button */}
+          <div style={{ marginBottom: 'var(--space-8)', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1', minWidth: '250px' }}>
+              <ButtonColorful 
+                onClick={onStartRound}
+                label="Start Round"
+                subtitle="Begin quiz buzzer round"
+                className="start-round-button"
+              />
+            </div>
+            <button
+              onClick={openLeaderboard}
+              className="leaderboard-button"
+              style={{
+                padding: '1.5rem 2rem',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: '2px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '1rem',
+                color: 'white',
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
+                transition: 'all 0.3s ease',
+                minWidth: '200px',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 15px 40px rgba(102, 126, 234, 0.6)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(102, 126, 234, 0.4)';
+              }}
+            >
+              <ExternalLink size={20} />
+              Open Leaderboard
+            </button>
           </div>
 
           {/* Winner Display */}
-          {topThree.length > 0 && (
+          {allBuzzes.length > 0 && (
             <div className="winner-display">
               <div className="winner-content">
-                <div className="winner-text">Winner Announced</div>
-                <div className="winner-name">{topThree[0].participantName}</div>
+                <div className="winner-text">First Buzz</div>
+                <div className="winner-name">{allBuzzes[0].participantName}</div>
               </div>
             </div>
           )}
 
-          {/* Top 3 Participants Section */}
+          {/* Buzzers Section - Simple Rank Display */}
           <div className="form-section">
-            <h3 className="form-section-title">Leaderboard - Top Buzzers</h3>
+            <h3 className="form-section-title">Buzzer Rankings</h3>
             <div className="top-three-list">
-              {topThree.length > 0 ? (
-                topThree.map((buzz, index) => (
-                  <div key={buzz.participantId} className={`buzz-item rank-${index + 1}`}>
-                    <div className="buzz-rank">
-                      {index === 0 && '🥇'}
-                      {index === 1 && '🥈'}
-                      {index === 2 && '🥉'}
-                      #{index + 1}
-                    </div>
-                    <div className="buzz-info">
-                      <div className="buzz-name">{buzz.participantName}</div>
+              {allBuzzes.length > 0 ? (
+                allBuzzes.map((buzz, index) => (
+                  <div key={buzz.participantId} className="buzz-item">
+                    <div className="buzz-rank-number">#{index + 1}</div>
+                    <div className="buzz-info" style={{ flex: 1 }}>
+                      <div className="buzz-name">{buzz.participantName || buzz.name}</div>
                       <div className="buzz-time">
                         {new Date(buzz.timestamp).toLocaleTimeString()}
                       </div>
@@ -112,9 +146,6 @@ const HostView = ({ roomId, hostName, status, participants, buzzes, onStartRound
                           <div className="participant-name">{participant.name}</div>
                           {participant.rank && (
                             <div className="participant-rank">
-                              {participant.rank === 1 && '🥇'}
-                              {participant.rank === 2 && '🥈'}
-                              {participant.rank === 3 && '🥉'}
                               #{participant.rank}
                             </div>
                           )}

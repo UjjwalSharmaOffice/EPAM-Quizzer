@@ -33,6 +33,7 @@ class SignalingClient {
       try {
         console.log("[SignalingClient] Connecting to:", this.serverUrl);
         this.socket = io(this.serverUrl, {
+          autoConnect: false,
           reconnection: false,
           timeout: 20000,
           extraHeaders: {
@@ -40,6 +41,9 @@ class SignalingClient {
             "Bypass-Tunnel-Reminder": "true",
           },
         });
+        
+        // Manually trigger connection
+        this.socket.connect();
 
         this.socket.on("connect", () => {
           console.log("[SignalingClient] Connected", this.socket.id);
@@ -97,6 +101,11 @@ class SignalingClient {
     this.socket.on("buzzer:buzzesUpdated", (data) => {
       console.log("[SignalingClient] Received buzzesUpdated event", data);
       this.emit("buzzer:buzzesUpdated", data);
+    });
+
+    this.socket.on("leaderboard:updated", (data) => {
+      console.log("[SignalingClient] Received leaderboard:updated event", data);
+      this.emit("leaderboard:updated", data);
     });
   }
 

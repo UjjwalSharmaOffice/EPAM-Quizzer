@@ -14,10 +14,9 @@ class ThemeToggle {
         // Add disable transitions class on load
         document.documentElement.classList.add('preload');
 
-        // Initialize theme from storage or system preference
+        // Initialize theme from storage or default to dark mode
         const savedTheme = localStorage.getItem(this.STORAGE_KEY);
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const initialTheme = savedTheme || (systemPrefersDark ? this.DARK_THEME : this.LIGHT_THEME);
+        const initialTheme = savedTheme || this.DARK_THEME;
 
         this.setTheme(initialTheme, true);
 
