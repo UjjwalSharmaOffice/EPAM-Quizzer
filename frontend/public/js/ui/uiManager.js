@@ -41,6 +41,7 @@ class UIManager {
     this.elements.participantNameInput = document.getElementById('participantNameInput');
     this.elements.participantJoinBtn = document.getElementById('participantJoinBtn');
     this.elements.participantBuzzBtn = document.getElementById('participantBuzzBtn');
+    this.elements.participantSpaceHint = document.getElementById('participantSpaceHint');
     this.elements.participantWinnerDisplay = document.getElementById('participantWinnerDisplay');
     this.elements.participantStatus = document.getElementById('participantStatus');
     this.elements.participantTopThreeContainer = document.getElementById('participantTopThreeContainer');
@@ -349,7 +350,7 @@ class UIManager {
     this.elements.joinSection.style.display = 'none';
     this.elements.buzzerSection.style.display = 'block';
     this.elements.participantBuzzBtn.disabled = false;
-    this.elements.participantBuzzBtn.textContent = 'BUZZ!';
+    this.setParticipantBuzzButtonLabel('BUZZ!');
     this.updateParticipantStatus(`Connected as: ${participantName}`);
     this.updateParticipantBuzzStatus(null);
   }
@@ -384,7 +385,7 @@ class UIManager {
               <div class="rank-text">Rank #1</div>
             </div>
           `;
-        this.elements.participantBuzzBtn.textContent = 'You Buzzed First!';
+        this.setParticipantBuzzButtonLabel('You Buzzed First!');
       } else {
         this.elements.participantWinnerDisplay.innerHTML = `
             <div class="winner-content">
@@ -392,7 +393,7 @@ class UIManager {
               <div class="sub-text">Winner: ${data.winnerName}</div>
             </div>
           `;
-        this.elements.participantBuzzBtn.textContent = `Buzzed (#${myState.rank})`;
+        this.setParticipantBuzzButtonLabel(`Buzzed (#${myState.rank})`);
       }
       this.elements.participantWinnerDisplay.classList.add('active');
       this.elements.participantBuzzBtn.disabled = true;
@@ -466,19 +467,48 @@ class UIManager {
   setParticipantBuzzButtonState(enabled, buzzed, locked) {
     this.elements.participantBuzzBtn.disabled = !enabled;
 
+    const showSpaceHint = enabled && !locked && !buzzed;
+    if (this.elements.participantSpaceHint) {
+      this.elements.participantSpaceHint.style.display = showSpaceHint
+        ? 'block'
+        : 'none';
+    }
+
     if (locked) {
       if (!enabled) {
         // Not enabled and locked - show "Waiting for round" message
-        this.elements.participantBuzzBtn.textContent = 'Waiting for Round';
+        this.setParticipantBuzzButtonLabel('Waiting for Round');
       } else {
         // Enabled but locked - buzzer already used
-        this.elements.participantBuzzBtn.textContent = 'Locked';
+        this.setParticipantBuzzButtonLabel('Locked');
       }
     } else if (buzzed) {
-      this.elements.participantBuzzBtn.textContent = 'Buzzed';
+      this.setParticipantBuzzButtonLabel('Buzzed');
     } else {
-      this.elements.participantBuzzBtn.textContent = 'BUZZ!';
+      this.setParticipantBuzzButtonLabel('BUZZ!');
     }
+  }
+
+  /**
+   * Set participant buzz button label with icon
+   */
+  setParticipantBuzzButtonLabel(label) {
+    if (!this.elements.participantBuzzBtn) return;
+
+    const button = this.elements.participantBuzzBtn;
+    button.innerHTML = '';
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'buzz-icon';
+    iconSpan.setAttribute('aria-hidden', 'true');
+    iconSpan.innerHTML = '&#128276;';
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'buzz-label';
+    textSpan.textContent = label;
+
+    button.appendChild(iconSpan);
+    button.appendChild(textSpan);
   }
 
   /**

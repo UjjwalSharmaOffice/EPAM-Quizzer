@@ -658,6 +658,10 @@ body {
     margin: var(--space-8) 0;
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
 }
 
 .buzz-button::before {
@@ -689,6 +693,22 @@ body {
     cursor: not-allowed;
     box-shadow: none;
     opacity: 0.6;
+}
+
+.buzz-button .buzz-icon {
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.buzz-button .buzz-label {
+    line-height: 1;
+}
+
+.spacebar-hint {
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--gray-600);
+    margin-top: var(--space-2);
 }
 
 /* Info Box */

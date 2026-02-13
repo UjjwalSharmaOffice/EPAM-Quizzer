@@ -87,6 +87,10 @@ class App {
       .getElementById("participantBuzzBtn")
       .addEventListener("click", () => this.participantBuzz());
 
+    document.addEventListener("keydown", (event) =>
+      this.handleParticipantSpacebar(event),
+    );
+
     document.getElementById("changeServerBtn").addEventListener("click", () => {
       this.uiManager.changeServerUrl();
     });
@@ -279,6 +283,33 @@ class App {
     } catch (error) {
       this.uiManager.showError(error.message);
     }
+  }
+
+  /**
+   * Handle spacebar buzz for participants
+   */
+  async handleParticipantSpacebar(event) {
+    if (event.code !== "Space" || event.repeat) return;
+
+    if (!this.participantController) return;
+
+    const target = event.target;
+    const isEditableTarget =
+      target &&
+      (target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable);
+
+    if (isEditableTarget) return;
+
+    const status = this.participantController.getStatus();
+    const canBuzz =
+      status.roundStarted && !status.buzzerLocked && !status.hasLocalBuzzed;
+
+    if (!canBuzz) return;
+
+    event.preventDefault();
+    await this.participantBuzz();
   }
 }
 
