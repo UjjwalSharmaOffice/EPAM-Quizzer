@@ -16,7 +16,7 @@ class App {
     // If running on a domain (ngrok/localtunnel), default to that domain (origin)
     const defaultUrl =
       window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
+        window.location.hostname === "127.0.0.1"
         ? "http://localhost:3000"
         : window.location.origin;
 
@@ -289,6 +289,8 @@ class App {
    * Handle spacebar buzz for participants
    */
   async handleParticipantSpacebar(event) {
+    // Anti-cheat: Only accept real physical key presses, not synthetic JS events
+    if (!event.isTrusted) return;
     if (event.code !== "Space" || event.repeat) return;
 
     if (!this.participantController) return;
@@ -302,18 +304,22 @@ class App {
 
     if (isEditableTarget) return;
 
+    // Always prevent spacebar scrolling on the participant page
+    event.preventDefault();
+
     const status = this.participantController.getStatus();
     const canBuzz =
       status.roundStarted && !status.buzzerLocked && !status.hasLocalBuzzed;
 
     if (!canBuzz) return;
 
-    event.preventDefault();
     await this.participantBuzz();
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  window.app = new App();
+  // Anti-cheat: Do NOT expose app on window to prevent console access
+  // e.g. window.app.participantController.buzz() would bypass all UI checks
+  const app = new App();
   console.log("[App] Application initialized");
 });
