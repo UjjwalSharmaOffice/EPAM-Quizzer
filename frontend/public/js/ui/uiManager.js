@@ -223,7 +223,7 @@ class UIManager {
     }
 
     this.elements.hostParticipantsList.innerHTML = html;
-    
+
     // Update top 3 participants list
     this.updateTopThreeParticipants(participants);
   }
@@ -295,12 +295,14 @@ class UIManager {
       buzzes.forEach((buzz, index) => {
         const isWinner = index === 0;
         const timeDiff = buzz.diff > 0 ? `+${(buzz.diff / 1000).toFixed(3)}s` : 'WINNER';
+        const suspiciousIcon = buzz.suspicious ? ' <span class="suspicious-flag" title="Suspicious: ' + buzz.reactionTime + 'ms reaction time">⚠️</span>' : '';
+        const reactionInfo = buzz.reactionTime != null ? ` <span class="reaction-time">(${buzz.reactionTime}ms)</span>` : '';
 
         html += `
-            <li class="buzz-item ${isWinner ? 'winner' : ''}">
+            <li class="buzz-item ${isWinner ? 'winner' : ''} ${buzz.suspicious ? 'suspicious' : ''}">
               <span class="rank">#${index + 1}</span>
-              <span class="name">${buzz.name}</span>
-              <span class="time">${timeDiff}</span>
+              <span class="name">${buzz.name}${suspiciousIcon}</span>
+              <span class="time">${timeDiff}${reactionInfo}</span>
             </li>
           `;
       });
@@ -414,7 +416,7 @@ class UIManager {
       this.elements.participantWinnerDisplay.innerHTML = '<div>Waiting for host...</div>';
       this.elements.participantWinnerDisplay.classList.remove('active');
     }
-    
+
     // Update top 3 participants display for participant view
     if (data && data.buzzes) {
       this.updateParticipantTopThreeList(data.buzzes);
